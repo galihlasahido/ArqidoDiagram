@@ -1,60 +1,55 @@
 import SwiftUI
 import DiagramModel
 
-/// Phase 1 scope only: General + Flowchart. UML/C4/ERD/BPMN/Network/
-/// Security/cloud-vendor libraries are later phases. Clicking a shape adds
-/// it to the canvas (via `ShapeInsertionRequest` -> `CanvasHostView`) at the
-/// current viewport center — drag-and-drop from here onto a specific drop
-/// point is a reasonable future refinement, not required for "Add shapes"
-/// to be genuinely real today.
+/// Every Phase 1+2 shape (General/Flowchart/UML/C4/ERD/BPMN/Network/
+/// Security) via `ShapeCatalog`, with search/favorites/recently-used —
+/// per the spec's Shape Palette requirements. Clicking a shape adds it to
+/// the canvas (via `ShapeInsertionRequest` -> `CanvasHostView`) at the
+/// current viewport center; drag-and-drop onto a specific drop point is a
+/// reasonable future refinement, not required for "Add shapes" to be
+/// genuinely real today. Favorites/recents are session-only (not persisted
+/// across launches) — a deliberate scope cut, not an oversight.
 struct LibrarySidebarView: View {
     @ObservedObject var shapeInsertion: ShapeInsertionRequest
 
-    private struct ShapeEntry: Identifiable {
-        let type: ShapeType
-        let name: String
-        let symbol: String
-        var id: ShapeType { type }
+    @State private var searchText = ""
+    @State private var favorites: Set<ShapeType> = []
+    @State private var recentlyUsed: [ShapeType] = []
+
+    private var searchResults: [ShapeCatalogEntry]? {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return nil }
+        let lowered = query.lowercased()
+        return ShapeCatalog.all.filter { $0.name.lowercased().contains(lowered) }
     }
-
-    private let general: [ShapeEntry] = [
-        ShapeEntry(type: .rectangle, name: "Rectangle", symbol: "rectangle"),
-        ShapeEntry(type: .roundedRectangle, name: "Rounded Rectangle", symbol: "app"),
-        ShapeEntry(type: .circle, name: "Circle", symbol: "circle"),
-        ShapeEntry(type: .ellipse, name: "Ellipse", symbol: "oval"),
-        ShapeEntry(type: .diamond, name: "Diamond", symbol: "diamond"),
-        ShapeEntry(type: .triangle, name: "Triangle", symbol: "triangle"),
-        ShapeEntry(type: .hexagon, name: "Hexagon", symbol: "hexagon"),
-        ShapeEntry(type: .star, name: "Star", symbol: "star"),
-        ShapeEntry(type: .line, name: "Line", symbol: "line.diagonal"),
-        ShapeEntry(type: .arrow, name: "Arrow", symbol: "arrow.up.right"),
-        ShapeEntry(type: .text, name: "Text", symbol: "textformat"),
-        ShapeEntry(type: .stickyNote, name: "Sticky Note", symbol: "note.text"),
-        ShapeEntry(type: .image, name: "Image", symbol: "photo"),
-        ShapeEntry(type: .container, name: "Container", symbol: "square.dashed")
-    ]
-
-    private let flowchart: [ShapeEntry] = [
-        ShapeEntry(type: .flowchartStartEnd, name: "Start / End", symbol: "capsule"),
-        ShapeEntry(type: .flowchartProcess, name: "Process", symbol: "rectangle"),
-        ShapeEntry(type: .flowchartDecision, name: "Decision", symbol: "diamond"),
-        ShapeEntry(type: .flowchartInputOutput, name: "Input / Output", symbol: "square.on.square"),
-        ShapeEntry(type: .flowchartDocument, name: "Document", symbol: "doc"),
-        ShapeEntry(type: .flowchartDatabase, name: "Database", symbol: "cylinder"),
-        ShapeEntry(type: .flowchartManualProcess, name: "Manual Process", symbol: "hand.draw"),
-        ShapeEntry(type: .flowchartSubprocess, name: "Subprocess", symbol: "rectangle.split.3x1")
-    ]
 
     var body: some View {
         List {
-            Section("General") {
-                ForEach(general) { entry in
-                    shapeRow(entry)
-                }
+            HStack {
+                Image(systemName: "magnifyingglass").foregroundStyle(.secondary)
+                TextField("Search shapes…", text: $searchText)
+                    .textFieldStyle(.plain)
             }
-            Section("Flowchart") {
-                ForEach(flowchart) { entry in
-                    shapeRow(entry)
+
+            if let results = searchResults {
+                Section("Results") {
+                    ForEach(results) { entry in shapeRow(entry) }
+                }
+            } else {
+                if !favorites.isEmpty {
+                    Section("Favorites") {
+                        ForEach(ShapeCatalog.all.filter { favorites.contains($0.type) }) { entry in shapeRow(entry) }
+                    }
+                }
+                if !recentlyUsed.isEmpty {
+                    Section("Recently Used") {
+                        ForEach(recentEntries) { entry in shapeRow(entry) }
+                    }
+                }
+                ForEach(ShapeCategory.allCases, id: \.self) { category in
+                    Section(category.rawValue) {
+                        ForEach(ShapeCatalog.entries(for: category)) { entry in shapeRow(entry) }
+                    }
                 }
             }
         }
@@ -62,13 +57,42 @@ struct LibrarySidebarView: View {
         .navigationTitle("Libraries")
     }
 
-    private func shapeRow(_ entry: ShapeEntry) -> some View {
-        Button {
-            shapeInsertion.pendingType = entry.type
-        } label: {
-            Label(entry.name, systemImage: entry.symbol)
+    private var recentEntries: [ShapeCatalogEntry] {
+        let byType = Dictionary(uniqueKeysWithValues: ShapeCatalog.all.map { ($0.type, $0) })
+        return recentlyUsed.compactMap { byType[$0] }
+    }
+
+    private func shapeRow(_ entry: ShapeCatalogEntry) -> some View {
+        HStack {
+            Button {
+                insert(entry)
+            } label: {
+                Label(entry.name, systemImage: entry.symbol)
+            }
+            .buttonStyle(.plain)
+            .help("Add \(entry.name) to the canvas")
+
+            Spacer()
+
+            Button {
+                toggleFavorite(entry.type)
+            } label: {
+                Image(systemName: favorites.contains(entry.type) ? "star.fill" : "star")
+                    .foregroundStyle(favorites.contains(entry.type) ? Color.yellow : Color.secondary)
+            }
+            .buttonStyle(.plain)
+            .help(favorites.contains(entry.type) ? "Remove from Favorites" : "Add to Favorites")
         }
-        .buttonStyle(.plain)
-        .help("Add \(entry.name) to the canvas")
+    }
+
+    private func insert(_ entry: ShapeCatalogEntry) {
+        shapeInsertion.pendingType = entry.type
+        recentlyUsed.removeAll { $0 == entry.type }
+        recentlyUsed.insert(entry.type, at: 0)
+        if recentlyUsed.count > 8 { recentlyUsed.removeLast() }
+    }
+
+    private func toggleFavorite(_ type: ShapeType) {
+        if favorites.contains(type) { favorites.remove(type) } else { favorites.insert(type) }
     }
 }

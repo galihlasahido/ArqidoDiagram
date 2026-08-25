@@ -89,10 +89,34 @@ public enum ShapeGeometry {
 
         case .flowchartDatabase:
             return cylinderPath(in: rect)
+
+        case .umlClass, .umlInterface, .umlActor, .umlUseCase, .umlComponent, .umlPackage,
+             .umlSequenceLifeline, .umlActivity, .umlState, .umlDeploymentNode:
+            return umlPath(for: type, in: rect)
+
+        case .c4Person, .c4SoftwareSystem, .c4Container, .c4Component, .c4ExternalSystem:
+            return c4Path(for: type, in: rect)
+
+        case .erdEntity, .erdAttribute, .erdPrimaryKey, .erdForeignKey:
+            return erdPath(for: type, in: rect)
+
+        case .bpmnStartEvent, .bpmnIntermediateEvent, .bpmnEndEvent, .bpmnTask, .bpmnGateway,
+             .bpmnPool, .bpmnLane, .bpmnDataObject:
+            return bpmnPath(for: type, in: rect)
+
+        case .networkRouter, .networkSwitch, .networkFirewall, .networkLoadBalancer, .networkServer,
+             .networkNAS, .networkWiFi, .networkVPN, .networkProxy, .networkGateway, .networkDNS,
+             .networkInternet, .networkLaptop, .networkDesktop, .networkMobile, .networkIoT:
+            return networkPath(for: type, in: rect)
+
+        case .securityWAF, .securityIDS, .securityIPS, .securitySIEM, .securitySOC, .securityIAM,
+             .securityMFA, .securityHSM, .securityKMS, .securityCertificateAuthority, .securityDLP,
+             .securityZeroTrust:
+            return securityPath(for: type, in: rect)
         }
     }
 
-    private static func polygon(_ points: [CGPoint]) -> CGPath {
+    static func polygon(_ points: [CGPoint]) -> CGPath {
         let path = CGMutablePath()
         guard let first = points.first else { return path }
         path.move(to: first)
@@ -101,7 +125,7 @@ public enum ShapeGeometry {
         return path
     }
 
-    private static func starPath(in rect: CGRect, points: Int) -> CGPath {
+    static func starPath(in rect: CGRect, points: Int) -> CGPath {
         let center = CGPoint(x: rect.midX, y: rect.midY)
         let outerRadius = min(rect.width, rect.height) / 2
         let innerRadius = outerRadius * 0.4
@@ -120,7 +144,7 @@ public enum ShapeGeometry {
     }
 
     /// Rectangle with a single wavy scallop along the bottom edge.
-    private static func documentPath(in rect: CGRect) -> CGPath {
+    static func documentPath(in rect: CGRect) -> CGPath {
         let waveDepth = min(rect.height * 0.15, 12)
         let path = CGMutablePath()
         path.move(to: CGPoint(x: rect.minX, y: rect.minY))
@@ -136,7 +160,7 @@ public enum ShapeGeometry {
     }
 
     /// Cylinder: ellipse cap on top, straight sides, ellipse cap on bottom.
-    private static func cylinderPath(in rect: CGRect) -> CGPath {
+    static func cylinderPath(in rect: CGRect) -> CGPath {
         let capHeight = min(rect.height * 0.2, 16)
         let topCapRect = CGRect(x: rect.minX, y: rect.minY, width: rect.width, height: capHeight * 2)
         let bottomCapRect = CGRect(x: rect.minX, y: rect.maxY - capHeight * 2, width: rect.width, height: capHeight * 2)
