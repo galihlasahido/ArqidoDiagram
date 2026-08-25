@@ -32,6 +32,8 @@
 		B056DA583012F4ECD70AF47E /* DiagramExport in Frameworks */ = {isa = PBXBuildFile; productRef = 0A6F24B4CD43AEA820A278C7 /* DiagramExport */; };
 		BD103EF5017C1E4D9B44ED6D /* DiagramCommands in Frameworks */ = {isa = PBXBuildFile; productRef = A188D553E903E92AC790DEF6 /* DiagramCommands */; };
 		C2CC9AC89FE2DD85ED536CB9 /* DiagramDocumentWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944039CEA4BF2D86958B0CF8 /* DiagramDocumentWindowController.swift */; };
+		CCF51066A21E2ED6D3E387E7 /* TemplatePickerWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DCCEBDDFDEED916BC294B11 /* TemplatePickerWindowController.swift */; };
+		DB432E0DA079A995288E02C1 /* TemplatePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F6F2CA21F7122D1FC94C4B1 /* TemplatePickerView.swift */; };
 		E0D7FD9B533B97D6C21F948B /* AppCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25064BA4FC3F3E47A7952A5F /* AppCommands.swift */; };
 		ED9D539A30E56AE5FB990D41 /* InspectorBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E4C08CC768980DD2BA2916 /* InspectorBridge.swift */; };
 		F1EE3F26254786B37FAC7826 /* ArqidoDiagramApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219837F48E9DD01413C6FBDC /* ArqidoDiagramApp.swift */; };
@@ -50,8 +52,10 @@
 		3BFE5827FB1F7DB29704E326 /* CanvasStatusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasStatusModel.swift; sourceTree = "<group>"; };
 		488320F0290775EF9637D887 /* StatusBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarView.swift; sourceTree = "<group>"; };
 		4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasHostView.swift; sourceTree = "<group>"; };
+		4F6F2CA21F7122D1FC94C4B1 /* TemplatePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplatePickerView.swift; sourceTree = "<group>"; };
 		4FD41EC125B8CA9E44C02822 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		664420670A4167E8F7B57114 /* DiagramDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocument.swift; sourceTree = "<group>"; };
+		6DCCEBDDFDEED916BC294B11 /* TemplatePickerWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplatePickerWindowController.swift; sourceTree = "<group>"; };
 		7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionModel.swift; sourceTree = "<group>"; };
 		82B1719D49120024DD523AEF /* ValidationPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationPanelView.swift; sourceTree = "<group>"; };
 		944039CEA4BF2D86958B0CF8 /* DiagramDocumentWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocumentWindowController.swift; sourceTree = "<group>"; };
@@ -180,9 +184,19 @@
 				6EE2B0450C8C0A51C84EAA2D /* Pages */,
 				917F083DC78151E168A38437 /* Search */,
 				47C1C81FECA6B1A3C387B3B0 /* Sidebar */,
+				AEB4913E416272684B025C3B /* Templates */,
 				11A58AEA96BF296DA80F79E6 /* Validation */,
 			);
 			path = UI;
+			sourceTree = "<group>";
+		};
+		AEB4913E416272684B025C3B /* Templates */ = {
+			isa = PBXGroup;
+			children = (
+				4F6F2CA21F7122D1FC94C4B1 /* TemplatePickerView.swift */,
+				6DCCEBDDFDEED916BC294B11 /* TemplatePickerWindowController.swift */,
+			);
+			path = Templates;
 			sourceTree = "<group>";
 		};
 		E1C3EB59D4EBAC42F4EB3BB4 = {
@@ -315,6 +329,8 @@
 				A6FC6CAD90F492114CA034EB /* SelectionModel.swift in Sources */,
 				6953EBE493AEA65F0DD8785A /* ShapeInsertionRequest.swift in Sources */,
 				AFE71D5A194BDCE67CD4CEC9 /* StatusBarView.swift in Sources */,
+				DB432E0DA079A995288E02C1 /* TemplatePickerView.swift in Sources */,
+				CCF51066A21E2ED6D3E387E7 /* TemplatePickerWindowController.swift in Sources */,
 				30849A93609B16BC8256A73E /* ValidationModel.swift in Sources */,
 				7431EAC770DD5B1B30AFA9F0 /* ValidationPanelView.swift in Sources */,
 				36240E13DBD671FAD8E19C8F /* ValidationStore.swift in Sources */,

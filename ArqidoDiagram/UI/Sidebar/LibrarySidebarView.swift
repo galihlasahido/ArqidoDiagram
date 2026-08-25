@@ -96,7 +96,11 @@ struct LibrarySidebarView: View {
     }
 
     private var recentEntries: [ShapeCatalogEntry] {
-        let byType = Dictionary(uniqueKeysWithValues: ShapeCatalog.all.map { ($0.type, $0) })
+        // `ShapeCatalog.all` deliberately lists some shapes (networkFirewall,
+        // networkVPN) under two categories, so `.type` isn't a unique key —
+        // `uniquingKeysWith` keeps whichever entry appears first rather than
+        // crashing on the duplicate.
+        let byType = Dictionary(ShapeCatalog.all.map { ($0.type, $0) }, uniquingKeysWith: { first, _ in first })
         return recentlyUsed.compactMap { byType[$0] }
     }
 

@@ -20,6 +20,11 @@ struct AppCommands: Commands {
             }
             .keyboardShortcut("n", modifiers: .command)
 
+            Button("New from Template…") {
+                TemplatePickerWindowController.show()
+            }
+            .keyboardShortcut("n", modifiers: [.command, .shift])
+
             Button("Open…") {
                 NSDocumentController.shared.openDocument(nil)
             }

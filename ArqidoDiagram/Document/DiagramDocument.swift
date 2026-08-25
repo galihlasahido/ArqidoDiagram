@@ -24,6 +24,22 @@ final class DiagramDocument: NSDocument, ObservableObject {
         super.init()
     }
 
+    /// "New from Template" (see `TemplatePickerWindowController`) — the
+    /// template's page replaces the blank starter page's *content* while
+    /// keeping its id/order, so the document is otherwise a completely
+    /// ordinary one-page document, not a special template-backed mode.
+    /// Starts unmodified (no `updateChangeCount`), same as a blank new
+    /// document: this is the document's starting state, not a user edit.
+    convenience init(template: DiagramTemplate) {
+        self.init()
+        guard let pageID = model.pageOrder.first else { return }
+        var page = template.makePage()
+        page.id = pageID
+        page.order = 0
+        model.pages = [pageID: page]
+        model.title = template.name
+    }
+
     /// Writes a page's live content (nodes/edges/groups/z-order) back into
     /// `model` — the canvas's `SceneStore` is the source of truth while
     /// editing, but `model` is what `fileWrapper(ofType:)` actually
