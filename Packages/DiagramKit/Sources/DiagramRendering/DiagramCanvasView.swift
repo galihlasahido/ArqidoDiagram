@@ -416,6 +416,33 @@ public final class DiagramCanvasView: NSView {
         updateSelectionFromInteraction(Set(newNodes.map(\.id)))
     }
 
+    /// The AI Command Bar's insertion point — takes already-materialized,
+    /// already-laid-out nodes/edges (see `DiagramAI.AIArchitect`) and only
+    /// re-centers them on the viewport before adding them as one undoable
+    /// command, the same "one gesture, one undo step" discipline every
+    /// other insertion path here follows.
+    public func insertGeneratedNodes(_ nodes: [DiagramNode], edges: [DiagramEdge], at contentPoint: CGPoint? = nil) {
+        guard !nodes.isEmpty else { return }
+        let center = contentPoint ?? viewport.viewToContent(point: CGPoint(x: bounds.midX, y: bounds.midY))
+        let minX = nodes.map(\.position.x).min() ?? 0
+        let minY = nodes.map(\.position.y).min() ?? 0
+        let maxX = nodes.map { $0.position.x + $0.size.width }.max() ?? 0
+        let maxY = nodes.map { $0.position.y + $0.size.height }.max() ?? 0
+        let offsetX = center.x - (minX + maxX) / 2
+        let offsetY = center.y - (minY + maxY) / 2
+        let maxZ = (scene.nodes.values.map(\.zIndex).max() ?? -1)
+
+        let placedNodes = nodes.enumerated().map { index, node -> DiagramNode in
+            var copy = node
+            copy.position = Point2D(x: node.position.x + offsetX, y: node.position.y + offsetY)
+            copy.zIndex = maxZ + 1 + index
+            return copy
+        }
+
+        perform(CompositeCommand([AddNodesCommand(nodes: placedNodes), AddEdgesCommand(edges: edges)]), actionName: "Generate with AI")
+        updateSelectionFromInteraction(Set(placedNodes.map(\.id)))
+    }
+
     // MARK: - Auto layout
 
     @objc public func applyHierarchicalLayout(_ sender: Any?) { applyLayout(LayoutKind.hierarchical.engine) }

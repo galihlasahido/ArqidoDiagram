@@ -196,13 +196,10 @@ struct AppCommands: Commands {
         }
 
         CommandGroup(after: .toolbar) {
-            // Real, visibly-disabled affordance rather than a hidden or
-            // faked feature — ⌘K is in the spec's minimum shortcut list, but
-            // AIProvider (DiagramFoundation) has no implementation yet.
-            Button("AI Command Bar…") {}
-                .keyboardShortcut("k", modifiers: .command)
-                .disabled(true)
-                .help("AI features are not available yet.")
+            Button("AI Command Bar…") {
+                NotificationCenter.default.post(name: .toggleAICommandBar, object: nil)
+            }
+            .keyboardShortcut("k", modifiers: .command)
         }
     }
 }

@@ -12,6 +12,8 @@ struct ContentView: View {
     @StateObject private var validationModel = ValidationModel()
     @StateObject private var validationStore = ValidationStore()
     @StateObject private var versionHistoryModel = VersionHistoryModel()
+    @StateObject private var aiCommandBarModel = AICommandBarModel()
+    @StateObject private var aiConfigurationStore = AIConfigurationStore()
     @State private var activePageID: PageID?
 
     var body: some View {
@@ -48,6 +50,12 @@ struct ContentView: View {
                         .padding(12)
                 }
             }
+            .overlay(alignment: .top) {
+                if aiCommandBarModel.isPresented {
+                    AICommandBarView(document: document, commandBarModel: aiCommandBarModel, configStore: aiConfigurationStore, bridge: inspectorBridge, activePageID: $activePageID)
+                        .padding(.top, 12)
+                }
+            }
         } detail: {
             InspectorView(document: document, selection: selection, bridge: inspectorBridge)
                 .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 360)
@@ -66,6 +74,9 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .toggleVersionHistory)) { _ in
             versionHistoryModel.isPresented.toggle()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .toggleAICommandBar)) { _ in
+            aiCommandBarModel.isPresented.toggle()
         }
     }
 }

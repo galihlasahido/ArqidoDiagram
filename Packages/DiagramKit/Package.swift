@@ -15,7 +15,9 @@ let package = Package(
         .library(name: "DiagramInteraction", targets: ["DiagramInteraction"]),
         .library(name: "DiagramExport", targets: ["DiagramExport"]),
         .library(name: "DiagramLayout", targets: ["DiagramLayout"]),
-        .library(name: "DiagramValidation", targets: ["DiagramValidation"])
+        .library(name: "DiagramValidation", targets: ["DiagramValidation"]),
+        .library(name: "DiagramAI", targets: ["DiagramAI"]),
+        .library(name: "DiagramInterop", targets: ["DiagramInterop"])
     ],
     targets: [
         // Protocol-only seams for later phases (Layout, Validation, Import, AI)
@@ -67,12 +69,31 @@ let package = Package(
         // PNG/SVG/PDF export adapters, reuse DiagramRendering geometry.
         .target(name: "DiagramExport", dependencies: ["DiagramModel", "DiagramRendering"]),
 
+        // Phase 3 "AI": Prompt -> LLM -> Structured Diagram Model ->
+        // Validation -> Layout Engine -> Native Diagram Objects (the exact
+        // pipeline the spec draws). `AIProvider` is the abstraction —
+        // `OllamaAIProvider` (local, no network request ever leaves the
+        // machine) and `RemoteAIProvider` (explicit, user-configured
+        // external endpoint) are the two concrete backends. No AppKit —
+        // the app target owns the ⌘K UI and Keychain-backed configuration.
+        .target(name: "DiagramAI", dependencies: ["DiagramModel", "DiagramLayout", "DiagramValidation"]),
+
+        // Phase 3/4 "Code <-> Diagram": deterministic (non-AI) parsers and
+        // serializers — SQL/OpenAPI/Docker Compose/Kubernetes/Terraform/
+        // Architecture-as-Code YAML importers, Mermaid/PlantUML/Graphviz/
+        // YAML/SQL exporters. These are real, well-defined structured-data
+        // transforms, not AI's job — reserving DiagramAI for the genuinely
+        // free-form cases (natural-language prompts, arbitrary source code).
+        .target(name: "DiagramInterop", dependencies: ["DiagramModel"]),
+
         .testTarget(name: "DiagramModelTests", dependencies: ["DiagramModel"]),
         .testTarget(name: "DiagramPersistenceTests", dependencies: ["DiagramPersistence", "DiagramValidation"]),
         .testTarget(name: "DiagramCommandsTests", dependencies: ["DiagramCommands"]),
         .testTarget(name: "DiagramRenderingTests", dependencies: ["DiagramRendering"]),
         .testTarget(name: "DiagramExportTests", dependencies: ["DiagramExport"]),
         .testTarget(name: "DiagramLayoutTests", dependencies: ["DiagramLayout"]),
-        .testTarget(name: "DiagramValidationTests", dependencies: ["DiagramValidation"])
+        .testTarget(name: "DiagramValidationTests", dependencies: ["DiagramValidation"]),
+        .testTarget(name: "DiagramAITests", dependencies: ["DiagramAI"]),
+        .testTarget(name: "DiagramInteropTests", dependencies: ["DiagramInterop"])
     ]
 )

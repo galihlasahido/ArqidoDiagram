@@ -6,5 +6,11 @@
 	<true/>
 	<key>com.apple.security.files.user-selected.read-write</key>
 	<true/>
+	<!-- Only used by the opt-in AI features (§25/§26): Local mode talks to
+	     a model server on this machine (e.g. Ollama on localhost), External
+	     mode talks to a user-configured endpoint. Both are off by default;
+	     no other feature in this app makes a network request. -->
+	<key>com.apple.security.network.client</key>
+	<true/>
 </dict>
 </plist>

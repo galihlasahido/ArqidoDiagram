@@ -53,3 +53,7 @@ targets:
         product: DiagramFoundation
       - package: DiagramKit
         product: DiagramValidation
+      - package: DiagramKit
+        product: DiagramAI
+      - package: DiagramKit
+        product: DiagramInterop
