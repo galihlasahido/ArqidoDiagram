@@ -7,6 +7,7 @@ struct ContentView: View {
     @StateObject private var selection = SelectionModel()
     @StateObject private var shapeInsertion = ShapeInsertionRequest()
     @StateObject private var inspectorBridge = InspectorBridge()
+    @StateObject private var searchModel = SearchModel()
     @State private var activePageID: PageID?
 
     var body: some View {
@@ -27,6 +28,12 @@ struct ContentView: View {
             )
             .navigationSplitViewColumnWidth(min: 400, ideal: 900)
             .navigationTitle(document.model.title)
+            .overlay(alignment: .top) {
+                if searchModel.isPresented {
+                    SearchOverlayView(document: document, searchModel: searchModel, bridge: inspectorBridge, activePageID: $activePageID)
+                        .padding(.top, 12)
+                }
+            }
         } detail: {
             InspectorView(document: document, selection: selection, bridge: inspectorBridge)
                 .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 360)
@@ -36,6 +43,9 @@ struct ContentView: View {
         }
         .onAppear {
             if activePageID == nil { activePageID = document.model.pageOrder.first }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .toggleSearch)) { _ in
+            searchModel.isPresented.toggle()
         }
     }
 }

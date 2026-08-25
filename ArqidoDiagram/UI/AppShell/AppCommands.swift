@@ -99,6 +99,13 @@ struct AppCommands: Commands {
             .keyboardShortcut("a", modifiers: .command)
         }
 
+        CommandGroup(after: .textEditing) {
+            Button("Find…") {
+                NotificationCenter.default.post(name: .toggleSearch, object: nil)
+            }
+            .keyboardShortcut("f", modifiers: .command)
+        }
+
         CommandMenu("Arrange") {
             Button("Bring Forward") {
                 NSApp.sendAction(Selector(("bringForward:")), to: nil, from: nil)

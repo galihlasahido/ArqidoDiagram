@@ -15,7 +15,9 @@
 		313C3528020CF88B9388AD55 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD41EC125B8CA9E44C02822 /* InspectorView.swift */; };
 		4070B241E7F75DFE01419BFC /* ExportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE97C4A706BBEE597FC5D32 /* ExportCoordinator.swift */; };
 		6953EBE493AEA65F0DD8785A /* ShapeInsertionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325E12829E933C04377339CB /* ShapeInsertionRequest.swift */; };
+		8027D7A935EBB9D8B42273F9 /* SearchOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A84E2B9E3A1C093CEE48F399 /* SearchOverlayView.swift */; };
 		8A5AE0E29173FCD425AC5DB3 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */; };
+		9B724A1BF58F29233A43FA66 /* SearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA24D528E7496C8D290A3595 /* SearchModel.swift */; };
 		A62E6C07DD68BBC90F4BE9F7 /* DiagramInteraction in Frameworks */ = {isa = PBXBuildFile; productRef = F7D637675F00F7E7335EAA60 /* DiagramInteraction */; };
 		A6FC6CAD90F492114CA034EB /* SelectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */; };
 		ADA29FD3842F9982F88598B3 /* CanvasStatusModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFE5827FB1F7DB29704E326 /* CanvasStatusModel.swift */; };
@@ -44,12 +46,14 @@
 		664420670A4167E8F7B57114 /* DiagramDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocument.swift; sourceTree = "<group>"; };
 		7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionModel.swift; sourceTree = "<group>"; };
 		944039CEA4BF2D86958B0CF8 /* DiagramDocumentWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocumentWindowController.swift; sourceTree = "<group>"; };
+		A84E2B9E3A1C093CEE48F399 /* SearchOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchOverlayView.swift; sourceTree = "<group>"; };
 		AC0AC164C4B632D1A80B8B69 /* DiagramKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DiagramKit; path = Packages/DiagramKit; sourceTree = SOURCE_ROOT; };
 		AFE97C4A706BBEE597FC5D32 /* ExportCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCoordinator.swift; sourceTree = "<group>"; };
 		B039D17C71B630291DB01003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C8938FD75E8AD92E2B7A36E4 /* ArqidoDiagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ArqidoDiagram.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBC26882DD8172FD1012F325 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		D069B21A8816480382A0EAEB /* PageTabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageTabsView.swift; sourceTree = "<group>"; };
+		DA24D528E7496C8D290A3595 /* SearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
 		E4E4C08CC768980DD2BA2916 /* InspectorBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -134,6 +138,15 @@
 			path = Canvas;
 			sourceTree = "<group>";
 		};
+		917F083DC78151E168A38437 /* Search */ = {
+			isa = PBXGroup;
+			children = (
+				DA24D528E7496C8D290A3595 /* SearchModel.swift */,
+				A84E2B9E3A1C093CEE48F399 /* SearchOverlayView.swift */,
+			);
+			path = Search;
+			sourceTree = "<group>";
+		};
 		9CE3AECAE1B7255E96743362 /* UI */ = {
 			isa = PBXGroup;
 			children = (
@@ -141,6 +154,7 @@
 				8CDEBF7EFAA53772E5D0C547 /* Canvas */,
 				29509DA53928E9C7F8DEE861 /* Inspector */,
 				6EE2B0450C8C0A51C84EAA2D /* Pages */,
+				917F083DC78151E168A38437 /* Search */,
 				47C1C81FECA6B1A3C387B3B0 /* Sidebar */,
 			);
 			path = UI;
@@ -268,6 +282,8 @@
 				313C3528020CF88B9388AD55 /* InspectorView.swift in Sources */,
 				8A5AE0E29173FCD425AC5DB3 /* LibrarySidebarView.swift in Sources */,
 				FEF7AB1A4FFBB17D7C52DC0A /* PageTabsView.swift in Sources */,
+				9B724A1BF58F29233A43FA66 /* SearchModel.swift in Sources */,
+				8027D7A935EBB9D8B42273F9 /* SearchOverlayView.swift in Sources */,
 				A6FC6CAD90F492114CA034EB /* SelectionModel.swift in Sources */,
 				6953EBE493AEA65F0DD8785A /* ShapeInsertionRequest.swift in Sources */,
 				AFE71D5A194BDCE67CD4CEC9 /* StatusBarView.swift in Sources */,

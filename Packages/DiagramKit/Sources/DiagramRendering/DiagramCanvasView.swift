@@ -143,6 +143,16 @@ public final class DiagramCanvasView: NSView {
         viewport = CanvasViewport.fitting(contentBounds: contentBounds(), viewSize: bounds.size, padding: padding)
     }
 
+    /// Zoom-to-result for search (⌘F) — selects and frames a single node.
+    /// A no-op if `id` isn't on the currently-loaded page; callers that just
+    /// switched pages should defer this call until after that switch has
+    /// actually reached this view (see search UI's use of this).
+    public func zoomToNode(_ id: NodeID, padding: CGFloat = 120) {
+        guard let node = scene.nodes[id] else { return }
+        updateSelectionFromInteraction(expandedForGrouping([id]))
+        viewport = CanvasViewport.fitting(contentBounds: node.frame, viewSize: bounds.size, padding: padding)
+    }
+
     private func contentBounds() -> CGRect {
         var result: CGRect?
         for node in scene.nodes.values {
