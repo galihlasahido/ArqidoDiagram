@@ -108,6 +108,27 @@ struct AppCommands: Commands {
                 NSApp.sendAction(Selector(("ungroupSelection:")), to: nil, from: nil)
             }
             .keyboardShortcut("g", modifiers: [.command, .shift])
+
+            Divider()
+
+            Button("Lock") { NSApp.sendAction(Selector(("toggleLock:")), to: nil, from: nil) }
+                .keyboardShortcut("l", modifiers: .command)
+            Button("Hide") { NSApp.sendAction(Selector(("toggleHidden:")), to: nil, from: nil) }
+                .keyboardShortcut("h", modifiers: [.command, .shift])
+
+            Divider()
+
+            Button("Align Left") { NSApp.sendAction(Selector(("alignLeft:")), to: nil, from: nil) }
+            Button("Align Right") { NSApp.sendAction(Selector(("alignRight:")), to: nil, from: nil) }
+            Button("Align Center") { NSApp.sendAction(Selector(("alignCenterHorizontally:")), to: nil, from: nil) }
+            Button("Align Top") { NSApp.sendAction(Selector(("alignTop:")), to: nil, from: nil) }
+            Button("Align Bottom") { NSApp.sendAction(Selector(("alignBottom:")), to: nil, from: nil) }
+            Button("Align Middle") { NSApp.sendAction(Selector(("alignMiddle:")), to: nil, from: nil) }
+
+            Divider()
+
+            Button("Distribute Horizontally") { NSApp.sendAction(Selector(("distributeHorizontally:")), to: nil, from: nil) }
+            Button("Distribute Vertically") { NSApp.sendAction(Selector(("distributeVertically:")), to: nil, from: nil) }
         }
 
         CommandGroup(after: .toolbar) {

@@ -227,10 +227,23 @@ public final class DiagramCanvasView: NSView {
 
     @objc public func delete(_ sender: Any?) {
         guard !selection.isEmpty else { return }
-        let removed = selection.compactMap { scene.nodes[$0] }
+        // Locked nodes are excluded, not deleted-then-warned-about — the
+        // remaining (still-locked) selection stays selected afterward so
+        // it's obvious those didn't disappear silently.
+        let removed = selection.compactMap { scene.nodes[$0] }.filter { !$0.isLocked }
         guard !removed.isEmpty else { return }
         perform(RemoveNodesCommand(nodes: removed), actionName: "Delete")
-        updateSelectionFromInteraction([])
+        updateSelectionFromInteraction(selection.subtracting(removed.map(\.id)))
+    }
+
+    // MARK: - Lock / hide
+
+    @objc public func toggleLock(_ sender: Any?) {
+        updateSelectedNodes(actionName: "Toggle Lock") { $0.isLocked.toggle() }
+    }
+
+    @objc public func toggleHidden(_ sender: Any?) {
+        updateSelectedNodes(actionName: "Toggle Hidden") { $0.isHidden.toggle() }
     }
 
     @objc public func duplicate(_ sender: Any?) {
@@ -319,6 +332,45 @@ public final class DiagramCanvasView: NSView {
         }
 
         guard !after.isEmpty else { return }
+        perform(UpdateNodesCommand(before: before, after: after), actionName: actionName)
+    }
+
+    // MARK: - Alignment / distribution
+
+    @objc public func alignLeft(_ sender: Any?) { align("Align Left") { bounds, node in node.position.x = bounds.minX } }
+    @objc public func alignRight(_ sender: Any?) { align("Align Right") { bounds, node in node.position.x = bounds.maxX - node.size.width } }
+    @objc public func alignCenterHorizontally(_ sender: Any?) { align("Align Center") { bounds, node in node.position.x = bounds.midX - node.size.width / 2 } }
+    @objc public func alignTop(_ sender: Any?) { align("Align Top") { bounds, node in node.position.y = bounds.minY } }
+    @objc public func alignBottom(_ sender: Any?) { align("Align Bottom") { bounds, node in node.position.y = bounds.maxY - node.size.height } }
+    @objc public func alignMiddle(_ sender: Any?) { align("Align Middle") { bounds, node in node.position.y = bounds.midY - node.size.height / 2 } }
+
+    private func align(_ actionName: String, _ transform: @escaping (CGRect, inout DiagramNode) -> Void) {
+        guard selection.count > 1, let bounds = selectionBounds() else { return }
+        updateSelectedNodes(actionName: actionName) { node in transform(bounds, &node) }
+    }
+
+    /// Distributes left edges (horizontal) / top edges (vertical) with
+    /// equal spacing between the first and last node — a simpler rule than
+    /// "equal gap accounting for each node's width," but a real, honest
+    /// distribution rather than a half-implemented approximation of the
+    /// fancier version.
+    @objc public func distributeHorizontally(_ sender: Any?) { distribute("Distribute Horizontally") { $0.position.x } set: { $1.position.x = $0 } }
+    @objc public func distributeVertically(_ sender: Any?) { distribute("Distribute Vertically") { $0.position.y } set: { $1.position.y = $0 } }
+
+    private func distribute(_ actionName: String, _ axis: (DiagramNode) -> Double, set: @escaping (Double, inout DiagramNode) -> Void) {
+        let nodes = selection.compactMap { scene.nodes[$0] }.sorted { axis($0) < axis($1) }
+        guard nodes.count > 2, let first = nodes.first, let last = nodes.last else { return }
+        let step = (axis(last) - axis(first)) / Double(nodes.count - 1)
+
+        var before: [NodeID: DiagramNode] = [:]
+        var after: [NodeID: DiagramNode] = [:]
+        for (index, node) in nodes.enumerated() {
+            var updated = node
+            set(axis(first) + step * Double(index), &updated)
+            before[node.id] = node
+            after[node.id] = updated
+        }
+        guard before != after else { return }
         perform(UpdateNodesCommand(before: before, after: after), actionName: actionName)
     }
 
@@ -599,14 +651,14 @@ public final class DiagramCanvasView: NSView {
 
         if !isExtending, !selection.isEmpty, let (handle, bounds) = hitResizeHandle(atView: viewPoint) {
             let frames = Dictionary(uniqueKeysWithValues: selection.compactMap { id -> (NodeID, CGRect)? in
-                guard let node = scene.nodes[id] else { return nil }
+                guard let node = scene.nodes[id], !node.isLocked else { return nil }
                 return (id, node.frame)
             })
             dragMode = .resize(handle: handle, startBounds: bounds, startFrames: frames)
             return
         }
 
-        if !isExtending, let rotateID = hitRotationHandle(atView: viewPoint), let node = scene.nodes[rotateID] {
+        if !isExtending, let rotateID = hitRotationHandle(atView: viewPoint), let node = scene.nodes[rotateID], !node.isLocked {
             let center = node.frame.center
             let startAngle = atan2(contentPoint.y - center.y, contentPoint.x - center.x)
             dragMode = .rotate(nodeID: rotateID, center: center, startAngle: startAngle, startRotation: node.rotation)
@@ -625,7 +677,7 @@ public final class DiagramCanvasView: NSView {
                     updateSelectionFromInteraction(hitGroup)
                 }
                 let startPositions = Dictionary(uniqueKeysWithValues: selection.compactMap { id -> (NodeID, Point2D)? in
-                    guard let node = scene.nodes[id] else { return nil }
+                    guard let node = scene.nodes[id], !node.isLocked else { return nil }
                     return (id, node.position)
                 })
                 dragMode = .move(startPositions: startPositions, startContentPoint: contentPoint)

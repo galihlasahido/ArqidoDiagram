@@ -532,4 +532,96 @@ final class DiagramCanvasViewInteractionTests: XCTestCase {
         XCTAssertEqual(snapshot.edges[edge.id]?.source, .node(a.id, portID: nil))
         XCTAssertEqual(snapshot.edges[edge.id]?.target, .node(b.id, portID: nil))
     }
+
+    // MARK: - Alignment / distribution
+
+    func testAlignLeftMovesAllSelectedNodesToTheLeftmostEdge() {
+        let h = Harness()
+        let a = makeNode(x: 0, y: 0, w: 100, h: 60)
+        let b = makeNode(x: 300, y: 200, w: 100, h: 60)
+        h.view.loadPage(page(with: [a, b]))
+        h.view.applyExternalSelection([a.id, b.id])
+
+        h.view.alignLeft(nil)
+
+        let snapshot = h.view.currentPageSnapshot(name: "T", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.nodes[a.id]?.position.x, 0)
+        XCTAssertEqual(snapshot.nodes[b.id]?.position.x, 0)
+    }
+
+    func testAlignRequiresMultipleSelectedNodes() {
+        let h = Harness()
+        let a = makeNode(x: 50, y: 0)
+        h.view.loadPage(page(with: [a]))
+        h.view.applyExternalSelection([a.id])
+        let undoManager = UndoManager()
+        h.view.documentUndoManager = undoManager
+
+        h.view.alignLeft(nil)
+        XCTAssertFalse(undoManager.canUndo)
+    }
+
+    func testDistributeHorizontallySpacesNodesEvenlyByLeftEdge() {
+        let h = Harness()
+        let a = makeNode(x: 0, y: 0, w: 50, h: 50)
+        let b = makeNode(x: 40, y: 0, w: 50, h: 50) // will end up in the middle
+        let c = makeNode(x: 100, y: 0, w: 50, h: 50)
+        h.view.loadPage(page(with: [a, b, c]))
+        h.view.applyExternalSelection([a.id, b.id, c.id])
+
+        h.view.distributeHorizontally(nil)
+
+        let snapshot = h.view.currentPageSnapshot(name: "T", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.nodes[b.id]?.position.x, 50, "midpoint node should land exactly halfway between the outer two")
+    }
+
+    // MARK: - Lock / hide
+
+    func testLockedNodeDoesNotMoveViaDrag() {
+        let h = Harness()
+        var node = makeNode(x: 100, y: 100, w: 100, h: 60)
+        node.isLocked = true
+        h.view.loadPage(page(with: [node]))
+        h.view.applyExternalSelection([node.id])
+
+        h.drag(from: CGPoint(x: 150, y: 130), to: CGPoint(x: 300, y: 300))
+
+        let snapshot = h.view.currentPageSnapshot(name: "T", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.nodes[node.id]?.position, Point2D(x: 100, y: 100))
+    }
+
+    func testDeleteSkipsLockedNodesButKeepsThemSelected() {
+        let h = Harness()
+        var locked = makeNode(x: 0)
+        locked.isLocked = true
+        let unlocked = makeNode(x: 300)
+        h.view.loadPage(page(with: [locked, unlocked]))
+        h.view.applyExternalSelection([locked.id, unlocked.id])
+
+        h.view.delete(nil)
+
+        XCTAssertEqual(h.view.nodeCount, 1)
+        XCTAssertEqual(h.view.selection, [locked.id])
+    }
+
+    func testToggleLockAndHiddenAreUndoable() {
+        let h = Harness()
+        let node = makeNode()
+        h.view.loadPage(page(with: [node]))
+        h.view.applyExternalSelection([node.id])
+        let undoManager = UndoManager()
+        h.view.documentUndoManager = undoManager
+
+        h.view.toggleLock(nil)
+        h.view.toggleHidden(nil)
+        var snapshot = h.view.currentPageSnapshot(name: "T", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.nodes[node.id]?.isLocked, true)
+        XCTAssertEqual(snapshot.nodes[node.id]?.isHidden, true)
+
+        undoManager.undo()
+        undoManager.undo()
+        snapshot = h.view.currentPageSnapshot(name: "T", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.nodes[node.id]?.isLocked, false)
+        XCTAssertEqual(snapshot.nodes[node.id]?.isHidden, false)
+    }
 }
