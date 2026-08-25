@@ -342,6 +342,46 @@ public final class DiagramCanvasView: NSView {
         updateSelectionFromInteraction(Set(copies.map(\.id)))
     }
 
+    /// Spec §19 "Environment Modeling": "Allow: Duplicate environment" —
+    /// clones the selection with a different `Metadata.environment` tag,
+    /// the starting point for standing up a new environment's diagram from
+    /// an existing one (e.g. bootstrap "Staging" from "Production", then
+    /// diverge). Prompts for the new tag via `NSAlert`, matching
+    /// `saveSelectionAsComponent`'s established pattern for this module.
+    @objc public func duplicateForEnvironment(_ sender: Any?) {
+        guard !selection.isEmpty else { return }
+        let originals = selection.compactMap { scene.nodes[$0] }
+        guard !originals.isEmpty else { return }
+
+        let alert = NSAlert()
+        alert.messageText = "Duplicate for Environment"
+        alert.informativeText = "The selected objects will be copied with this Environment tag."
+        alert.addButton(withTitle: "Duplicate")
+        alert.addButton(withTitle: "Cancel")
+
+        let field = NSTextField(string: "Staging")
+        field.frame = NSRect(x: 0, y: 0, width: 260, height: 24)
+        alert.accessoryView = field
+        alert.window.initialFirstResponder = field
+
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        let environment = field.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !environment.isEmpty else { return }
+
+        let maxZ = (scene.nodes.values.map(\.zIndex).max() ?? -1)
+        let copies = originals.enumerated().map { index, original -> DiagramNode in
+            var copy = original
+            copy.id = NodeID()
+            copy.position = Point2D(x: original.position.x + 24, y: original.position.y + 24)
+            copy.zIndex = maxZ + 1 + index
+            copy.groupID = nil
+            copy.metadata.environment = environment
+            return copy
+        }
+        perform(AddNodesCommand(nodes: copies), actionName: "Duplicate for Environment")
+        updateSelectionFromInteraction(Set(copies.map(\.id)))
+    }
+
     // MARK: - Custom components
 
     /// Prompts for a name/category via a plain `NSAlert` (matching the

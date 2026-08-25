@@ -283,6 +283,63 @@ public enum TemplateCatalog {
             b.edge("OrderService", "Order", label: "manages")
             b.edge("OrderService", "IOrderRepository", label: "depends on")
             return b.page
+        },
+        DiagramTemplate(id: "microservices", name: "Microservices", category: .software, summary: "A gateway routing to independently-owned services, each with its own database.") {
+            var b = TemplateBuilder(name: "Microservices")
+            b.node("API Gateway", type: .networkGateway, x: 0, y: 200)
+            b.node("Orders Service", type: .c4Container, x: 320, y: 0, semanticType: "service")
+            b.node("Orders DB", type: .flowchartDatabase, x: 620, y: 0, semanticType: "database")
+            b.node("Users Service", type: .c4Container, x: 320, y: 200, semanticType: "service")
+            b.node("Users DB", type: .flowchartDatabase, x: 620, y: 200, semanticType: "database")
+            b.node("Inventory Service", type: .c4Container, x: 320, y: 400, semanticType: "service")
+            b.node("Inventory DB", type: .flowchartDatabase, x: 620, y: 400, semanticType: "database")
+            b.edge("API Gateway", "Orders Service")
+            b.edge("API Gateway", "Users Service")
+            b.edge("API Gateway", "Inventory Service")
+            b.edge("Orders Service", "Orders DB")
+            b.edge("Users Service", "Users DB")
+            b.edge("Inventory Service", "Inventory DB")
+            return b.page
+        },
+        DiagramTemplate(id: "event-driven", name: "Event-Driven Architecture", category: .software, summary: "Producers and consumers decoupled through an event bus.") {
+            var b = TemplateBuilder(name: "Event-Driven Architecture")
+            b.node("Order Service", type: .c4Container, x: 0, y: 0, semanticType: "service")
+            b.node("Inventory Service", type: .c4Container, x: 0, y: 260, semanticType: "service")
+            b.node("Event Bus", type: .networkServer, x: 320, y: 130, semanticType: "queue")
+            b.node("Notification Service", type: .c4Container, x: 640, y: 0, semanticType: "service")
+            b.node("Analytics Service", type: .c4Container, x: 640, y: 260, semanticType: "service")
+            b.edge("Order Service", "Event Bus", label: "publishes")
+            b.edge("Inventory Service", "Event Bus", label: "publishes")
+            b.edge("Event Bus", "Notification Service", label: "consumes")
+            b.edge("Event Bus", "Analytics Service", label: "consumes")
+            return b.page
+        },
+        DiagramTemplate(id: "api-architecture", name: "API Architecture", category: .software, summary: "Client through a gateway to authenticated, versioned backend APIs.") {
+            var b = TemplateBuilder(name: "API Architecture")
+            b.node("Client App", type: .c4Person, x: 0, y: 160)
+            b.node("API Gateway", type: .networkGateway, x: 280, y: 160)
+            b.node("Auth Service", type: .securityIAM, x: 560, y: 0)
+            b.node("Orders API", type: .c4Container, x: 560, y: 160, semanticType: "service")
+            b.node("Users API", type: .c4Container, x: 560, y: 320, semanticType: "service")
+            b.edge("Client App", "API Gateway")
+            b.edge("API Gateway", "Auth Service", label: "authenticates")
+            b.edge("API Gateway", "Orders API")
+            b.edge("API Gateway", "Users API")
+            return b.page
+        },
+        DiagramTemplate(id: "mindmap", name: "Mindmap", category: .software, summary: "A central idea radiating out to branches — brainstorm structure, not architecture.") {
+            var b = TemplateBuilder(name: "Mindmap")
+            b.node("Central Idea", type: .circle, x: 400, y: 240, w: 180, h: 120)
+            b.node("Branch 1", type: .roundedRectangle, x: 0, y: 0, w: 180, h: 80)
+            b.node("Branch 2", type: .roundedRectangle, x: 0, y: 200, w: 180, h: 80)
+            b.node("Branch 3", type: .roundedRectangle, x: 0, y: 400, w: 180, h: 80)
+            b.node("Branch 4", type: .roundedRectangle, x: 820, y: 0, w: 180, h: 80)
+            b.node("Branch 5", type: .roundedRectangle, x: 820, y: 200, w: 180, h: 80)
+            b.node("Branch 6", type: .roundedRectangle, x: 820, y: 400, w: 180, h: 80)
+            for branch in ["Branch 1", "Branch 2", "Branch 3", "Branch 4", "Branch 5", "Branch 6"] {
+                b.edge("Central Idea", branch)
+            }
+            return b.page
         }
     ]
 

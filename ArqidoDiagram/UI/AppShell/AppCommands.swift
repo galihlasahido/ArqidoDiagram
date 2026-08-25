@@ -132,6 +132,11 @@ struct AppCommands: Commands {
             }
             .keyboardShortcut("d", modifiers: .command)
 
+            Button("Duplicate for Environment…") {
+                NSApp.sendAction(Selector(("duplicateForEnvironment:")), to: nil, from: nil)
+            }
+            .keyboardShortcut("d", modifiers: [.command, .shift])
+
             Button("Delete") {
                 NSApp.sendAction(Selector(("delete:")), to: nil, from: nil)
             }
