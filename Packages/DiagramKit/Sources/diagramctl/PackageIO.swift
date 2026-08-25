@@ -18,4 +18,10 @@ enum PackageIO {
         let wrapper = try PackageWriter.fileWrapper(for: model)
         try wrapper.write(to: url, options: [.atomic], originalContentsURL: nil)
     }
+
+    static func readADRs(from path: String) throws -> [ArchitectureDecisionRecord] {
+        let url = URL(fileURLWithPath: path)
+        let wrapper = try FileWrapper(url: url)
+        return try PackageReader.adrs(from: wrapper)
+    }
 }

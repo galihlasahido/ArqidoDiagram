@@ -25,11 +25,15 @@ public enum PackageWriter {
     /// under `versions/<uuid>.json` — encrypted the same way as the live
     /// content when `password` is set, since a snapshot can carry exactly
     /// the same sensitive data the current document does.
+    /// `adrs` (spec §20) are written as one `adrs.json` array — unlike
+    /// versions, ADRs are few and small, so there's no lazy-loading benefit
+    /// to one file per record.
     public static func fileWrapper(
         for document: DiagramDocumentModel,
         appVersion: String = "0.1.0",
         password: String? = nil,
-        versions: [DocumentVersion] = []
+        versions: [DocumentVersion] = [],
+        adrs: [ArchitectureDecisionRecord] = []
     ) throws -> FileWrapper {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
@@ -79,6 +83,9 @@ public enum PackageWriter {
             "assets": FileWrapper(directoryWithFileWrappers: [:]),
             "versions": FileWrapper(directoryWithFileWrappers: versionFileWrappers)
         ]
+        if !adrs.isEmpty {
+            children["adrs.json"] = FileWrapper(regularFileWithContents: try encoded(adrs))
+        }
         if let envelope {
             children["encryption.json"] = FileWrapper(regularFileWithContents: try encoder.encode(envelope))
         }

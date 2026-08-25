@@ -206,6 +206,32 @@ final class PackageRoundTripTests: XCTestCase {
         XCTAssertEqual(decoded.first?.note, "Snapshot")
     }
 
+    func testADRsRoundTripThroughThePackage() throws {
+        let document = DiagramDocumentModel.blank(title: "Current", at: Date(timeIntervalSince1970: 0))
+        let adr = ArchitectureDecisionRecord(
+            number: 1,
+            title: "Use Kafka for asynchronous integration",
+            status: .accepted,
+            context: "Payment service requires asynchronous processing.",
+            decision: "Use Apache Kafka.",
+            consequences: ["+ High throughput", "+ Decoupling", "- Operational complexity"]
+        )
+
+        let wrapper = try PackageWriter.fileWrapper(for: document, adrs: [adr])
+        let decoded = try PackageReader.adrs(from: wrapper)
+
+        XCTAssertEqual(decoded.count, 1)
+        XCTAssertEqual(decoded.first?.title, "Use Kafka for asynchronous integration")
+        XCTAssertEqual(decoded.first?.status, .accepted)
+        XCTAssertEqual(decoded.first?.consequences, ["+ High throughput", "+ Decoupling", "- Operational complexity"])
+    }
+
+    func testNoADRsYieldsAnEmptyArrayRatherThanThrowing() throws {
+        let document = DiagramDocumentModel.blank(title: "Current", at: Date(timeIntervalSince1970: 0))
+        let wrapper = try PackageWriter.fileWrapper(for: document)
+        XCTAssertTrue(try PackageReader.adrs(from: wrapper).isEmpty)
+    }
+
     func testCurrentSchemaVersionRoundTripsWithoutMigration() throws {
         let document = DiagramDocumentModel.blank(at: Date(timeIntervalSince1970: 0))
         XCTAssertEqual(document.schemaVersion, DiagramDocumentModel.currentSchemaVersion)

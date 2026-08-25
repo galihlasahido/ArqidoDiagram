@@ -29,10 +29,11 @@ enum DocumentationExporter {
         }
 
         let pages = document.model.pageOrder.compactMap { document.model.pages[$0] }
+        let adrs = document.adrs
         let handleResponse: (NSApplication.ModalResponse) -> Void = { response in
             guard response == .OK, let url = panel.url else { return }
             do {
-                try export(title: document.model.title, pages: pages, format: format, to: url)
+                try export(title: document.model.title, pages: pages, adrs: adrs, format: format, to: url)
             } catch {
                 presentError(error, in: window)
             }
@@ -44,16 +45,16 @@ enum DocumentationExporter {
         }
     }
 
-    private static func export(title: String, pages: [DiagramPage], format: Format, to url: URL) throws {
+    private static func export(title: String, pages: [DiagramPage], adrs: [ArchitectureDecisionRecord], format: Format, to url: URL) throws {
         switch format {
         case .markdown:
-            let markdown = DocumentationGenerator.markdown(title: title, pages: pages)
+            let markdown = DocumentationGenerator.markdown(title: title, pages: pages, adrs: adrs)
             try markdown.write(to: url, atomically: true, encoding: .utf8)
         case .html:
-            let html = DocumentationGenerator.html(title: title, pages: pages)
+            let html = DocumentationGenerator.html(title: title, pages: pages, adrs: adrs)
             try html.write(to: url, atomically: true, encoding: .utf8)
         case .pdf:
-            let html = DocumentationGenerator.html(title: title, pages: pages)
+            let html = DocumentationGenerator.html(title: title, pages: pages, adrs: adrs)
             try writePDF(html: html, to: url)
         }
     }

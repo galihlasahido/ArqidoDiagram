@@ -14,6 +14,7 @@ struct ContentView: View {
     @StateObject private var versionHistoryModel = VersionHistoryModel()
     @StateObject private var aiCommandBarModel = AICommandBarModel()
     @StateObject private var aiConfigurationStore = AIConfigurationStore()
+    @StateObject private var adrModel = ADRModel()
     @State private var activePageID: PageID?
 
     var body: some View {
@@ -48,6 +49,9 @@ struct ContentView: View {
                 } else if versionHistoryModel.isPresented {
                     VersionHistoryPanelView(document: document, versionHistoryModel: versionHistoryModel)
                         .padding(12)
+                } else if adrModel.isPresented {
+                    ADRPanelView(document: document, adrModel: adrModel, selection: selection)
+                        .padding(12)
                 }
             }
             .overlay(alignment: .top) {
@@ -77,6 +81,9 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .toggleAICommandBar)) { _ in
             aiCommandBarModel.isPresented.toggle()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .toggleADRPanel)) { _ in
+            adrModel.isPresented.toggle()
         }
     }
 }

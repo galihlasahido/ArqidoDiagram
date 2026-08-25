@@ -21,6 +21,7 @@
 		36240E13DBD671FAD8E19C8F /* ValidationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142C7AED24EC297399F039B6 /* ValidationStore.swift */; };
 		4070B241E7F75DFE01419BFC /* ExportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE97C4A706BBEE597FC5D32 /* ExportCoordinator.swift */; };
 		469468E03BEF01B659F1C049 /* DocumentationExporter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 78EE1A2273307CB1E5E4ABBD /* DocumentationExporter.swift */; };
+		49B74FACCFBD5A7DCD22E3A6 /* ADRPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0874E01891B5684C642EC27 /* ADRPanelView.swift */; };
 		6953EBE493AEA65F0DD8785A /* ShapeInsertionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325E12829E933C04377339CB /* ShapeInsertionRequest.swift */; };
 		7431EAC770DD5B1B30AFA9F0 /* ValidationPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B1719D49120024DD523AEF /* ValidationPanelView.swift */; };
 		8027D7A935EBB9D8B42273F9 /* SearchOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A84E2B9E3A1C093CEE48F399 /* SearchOverlayView.swift */; };
@@ -44,8 +45,10 @@
 		C2CC9AC89FE2DD85ED536CB9 /* DiagramDocumentWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944039CEA4BF2D86958B0CF8 /* DiagramDocumentWindowController.swift */; };
 		CCF51066A21E2ED6D3E387E7 /* TemplatePickerWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DCCEBDDFDEED916BC294B11 /* TemplatePickerWindowController.swift */; };
 		D894A94F1A0476EC8578D58A /* AICommandRouter.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6E28D7485505E0BE0EE5336D /* AICommandRouter.swift */; };
+		D8DD870D9174D830C254B54B /* ADRModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFED81039D17C12055AAE0BA /* ADRModel.swift */; };
 		DB432E0DA079A995288E02C1 /* TemplatePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F6F2CA21F7122D1FC94C4B1 /* TemplatePickerView.swift */; };
 		E0D7FD9B533B97D6C21F948B /* AppCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25064BA4FC3F3E47A7952A5F /* AppCommands.swift */; };
+		E2849C33D271F68F5F114917 /* ADREditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3E2FBAC78BBB082FF12DEA90 /* ADREditorView.swift */; };
 		ED9D539A30E56AE5FB990D41 /* InspectorBridge.swift in Sources */ = {isa = PBXBuildFile; fileRef = E4E4C08CC768980DD2BA2916 /* InspectorBridge.swift */; };
 		F1EE3F26254786B37FAC7826 /* ArqidoDiagramApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219837F48E9DD01413C6FBDC /* ArqidoDiagramApp.swift */; };
 		F3EF981657B636BA0B2A4E32 /* CanvasHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */; };
@@ -65,6 +68,7 @@
 		25064BA4FC3F3E47A7952A5F /* AppCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCommands.swift; sourceTree = "<group>"; };
 		325E12829E933C04377339CB /* ShapeInsertionRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeInsertionRequest.swift; sourceTree = "<group>"; };
 		3BFE5827FB1F7DB29704E326 /* CanvasStatusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasStatusModel.swift; sourceTree = "<group>"; };
+		3E2FBAC78BBB082FF12DEA90 /* ADREditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ADREditorView.swift; sourceTree = "<group>"; };
 		488320F0290775EF9637D887 /* StatusBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarView.swift; sourceTree = "<group>"; };
 		4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasHostView.swift; sourceTree = "<group>"; };
 		4F6F2CA21F7122D1FC94C4B1 /* TemplatePickerView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = TemplatePickerView.swift; sourceTree = "<group>"; };
@@ -83,6 +87,7 @@
 		A84E2B9E3A1C093CEE48F399 /* SearchOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchOverlayView.swift; sourceTree = "<group>"; };
 		AC0AC164C4B632D1A80B8B69 /* DiagramKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DiagramKit; path = Packages/DiagramKit; sourceTree = SOURCE_ROOT; };
 		AFE97C4A706BBEE597FC5D32 /* ExportCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCoordinator.swift; sourceTree = "<group>"; };
+		AFED81039D17C12055AAE0BA /* ADRModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ADRModel.swift; sourceTree = "<group>"; };
 		B039D17C71B630291DB01003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C2030497A775908C64E078A6 /* CustomComponentStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomComponentStore.swift; sourceTree = "<group>"; };
 		C5C31F95F2B223066072B1A3 /* AICommandBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AICommandBarView.swift; sourceTree = "<group>"; };
@@ -91,6 +96,7 @@
 		CD401832FC7FC5BD5C463BF2 /* AIKeychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIKeychain.swift; sourceTree = "<group>"; };
 		D069B21A8816480382A0EAEB /* PageTabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageTabsView.swift; sourceTree = "<group>"; };
 		DA24D528E7496C8D290A3595 /* SearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
+		E0874E01891B5684C642EC27 /* ADRPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ADRPanelView.swift; sourceTree = "<group>"; };
 		E4E4C08CC768980DD2BA2916 /* InspectorBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -174,6 +180,16 @@
 			path = Sidebar;
 			sourceTree = "<group>";
 		};
+		578FA3E7C0E83605AAD10BD5 /* ADR */ = {
+			isa = PBXGroup;
+			children = (
+				3E2FBAC78BBB082FF12DEA90 /* ADREditorView.swift */,
+				AFED81039D17C12055AAE0BA /* ADRModel.swift */,
+				E0874E01891B5684C642EC27 /* ADRPanelView.swift */,
+			);
+			path = ADR;
+			sourceTree = "<group>";
+		};
 		6ECDD9660FBB83DCA4C06336 /* Packages */ = {
 			isa = PBXGroup;
 			children = (
@@ -226,6 +242,7 @@
 		9CE3AECAE1B7255E96743362 /* UI */ = {
 			isa = PBXGroup;
 			children = (
+				578FA3E7C0E83605AAD10BD5 /* ADR */,
 				2769CCF6B17F4AA6BA09AA7C /* AI */,
 				106098C530E0015278B96A90 /* AppShell */,
 				8CDEBF7EFAA53772E5D0C547 /* Canvas */,
@@ -362,6 +379,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E2849C33D271F68F5F114917 /* ADREditorView.swift in Sources */,
+				D8DD870D9174D830C254B54B /* ADRModel.swift in Sources */,
+				49B74FACCFBD5A7DCD22E3A6 /* ADRPanelView.swift in Sources */,
 				B4DB548EF42E1350E3D5DBD9 /* AICommandBarModel.swift in Sources */,
 				226EB1C4274A32777626886B /* AICommandBarView.swift in Sources */,
 				D894A94F1A0476EC8578D58A /* AICommandRouter.swift in Sources */,

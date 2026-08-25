@@ -22,15 +22,16 @@ struct DocumentCommand: ParsableCommand {
     func run() throws {
         let model = try PackageIO.read(from: input)
         let pages = model.pageOrder.compactMap { model.pages[$0] }
+        let adrs = (try? PackageIO.readADRs(from: input)) ?? []
 
         let text: String
         let ext: String
         switch format.lowercased() {
         case "markdown", "md":
-            text = DocumentationGenerator.markdown(title: model.title, pages: pages)
+            text = DocumentationGenerator.markdown(title: model.title, pages: pages, adrs: adrs)
             ext = "md"
         case "html":
-            text = DocumentationGenerator.html(title: model.title, pages: pages)
+            text = DocumentationGenerator.html(title: model.title, pages: pages, adrs: adrs)
             ext = "html"
         default:
             throw ValidationError("Unknown format \"\(format)\". Supported: markdown, html.")

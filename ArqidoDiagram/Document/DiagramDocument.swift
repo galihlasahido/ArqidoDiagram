@@ -30,6 +30,10 @@ final class DiagramDocument: NSDocument, ObservableObject {
     /// Newest first, since that's how `VersionHistoryPanelView` lists them.
     @Published private(set) var versions: [DocumentVersion] = []
 
+    /// Spec §20 "Architecture Decision Records": "Allow documents to
+    /// contain ADRs... ADRs should link to diagram objects."
+    @Published private(set) var adrs: [ArchitectureDecisionRecord] = []
+
     override init() {
         model = .blank(at: Date())
         super.init()
@@ -130,7 +134,7 @@ final class DiagramDocument: NSDocument, ObservableObject {
         // never touches the previously-saved on-disk package, and
         // NSDocument's standard package-write path (temp file + atomic
         // rename) handles on-disk atomicity on top of that.
-        return try PackageWriter.fileWrapper(for: model, password: password, versions: versions)
+        return try PackageWriter.fileWrapper(for: model, password: password, versions: versions, adrs: adrs)
     }
 
     /// Runs on the main thread (the default for `canConcurrentlyReadDocuments
@@ -142,6 +146,7 @@ final class DiagramDocument: NSDocument, ObservableObject {
         guard peek.isEncrypted else {
             model = try PackageReader.documentModel(from: fileWrapper)
             versions = (try? PackageReader.versions(from: fileWrapper)) ?? []
+            adrs = (try? PackageReader.adrs(from: fileWrapper)) ?? []
             return
         }
 
@@ -150,6 +155,7 @@ final class DiagramDocument: NSDocument, ObservableObject {
             model = decoded
             password = savedPassword
             versions = (try? PackageReader.versions(from: fileWrapper, password: savedPassword)) ?? []
+            adrs = (try? PackageReader.adrs(from: fileWrapper, password: savedPassword)) ?? []
             return
         }
 
@@ -161,6 +167,7 @@ final class DiagramDocument: NSDocument, ObservableObject {
                 model = try PackageReader.documentModel(from: fileWrapper, password: entered)
                 password = entered
                 versions = (try? PackageReader.versions(from: fileWrapper, password: entered)) ?? []
+                adrs = (try? PackageReader.adrs(from: fileWrapper, password: entered)) ?? []
                 return
             } catch PackageReadError.incorrectPassword {
                 continue
@@ -192,6 +199,59 @@ final class DiagramDocument: NSDocument, ObservableObject {
 
     @objc func exportDocumentationPDF(_ sender: Any?) {
         DocumentationExporter.presentSavePanelAndExport(document: self, format: .pdf, window: windowControllers.first?.window)
+    }
+
+    // MARK: - Architecture Decision Records
+    //
+    // Spec §20: "Allow documents to contain ADRs... ADRs should link to
+    // diagram objects." Mutations go through `undoManager` directly, same
+    // as page management — an ADR isn't part of any one page's live scene.
+
+    @discardableResult
+    func addADR(title: String, status: ADRStatus, context: String, decision: String, consequences: [String]) -> ArchitectureDecisionRecord {
+        let nextNumber = (adrs.map(\.number).max() ?? 0) + 1
+        let adr = ArchitectureDecisionRecord(number: nextNumber, title: title, status: status, context: context, decision: decision, consequences: consequences)
+        insertADR(adr)
+        return adr
+    }
+
+    func updateADR(_ adr: ArchitectureDecisionRecord) {
+        guard let index = adrs.firstIndex(where: { $0.id == adr.id }) else { return }
+        let previous = adrs[index]
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.updateADR(previous)
+        }
+        undoManager?.setActionName("Edit ADR")
+        adrs[index] = adr
+        updateChangeCount(.changeDone)
+    }
+
+    func deleteADR(id: UUID) {
+        guard let adr = adrs.first(where: { $0.id == id }) else { return }
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.insertADR(adr)
+        }
+        undoManager?.setActionName("Delete ADR")
+        adrs.removeAll { $0.id == id }
+        updateChangeCount(.changeDone)
+    }
+
+    /// Links (replaces, not appends — the ADR's linked set is set exactly
+    /// to what's selected right now) the currently-selected canvas objects
+    /// to an ADR.
+    func setLinkedNodes(_ nodeIDs: [NodeID], forADRWithID id: UUID) {
+        guard var adr = adrs.first(where: { $0.id == id }) else { return }
+        adr.linkedNodeIDs = nodeIDs
+        updateADR(adr)
+    }
+
+    private func insertADR(_ adr: ArchitectureDecisionRecord) {
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.deleteADR(id: adr.id)
+        }
+        undoManager?.setActionName("Add ADR")
+        adrs.append(adr)
+        updateChangeCount(.changeDone)
     }
 
     // MARK: - Versioning

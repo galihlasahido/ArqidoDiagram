@@ -65,9 +65,11 @@ struct ExportCommand: AsyncParsableCommand {
         case "sql":
             try SQLExporter.export(targetPage).write(to: outputURL, atomically: true, encoding: .utf8)
         case "markdown":
-            try DocumentationGenerator.markdown(title: model.title, pages: pages).write(to: outputURL, atomically: true, encoding: .utf8)
+            let adrs = (try? PackageIO.readADRs(from: input)) ?? []
+            try DocumentationGenerator.markdown(title: model.title, pages: pages, adrs: adrs).write(to: outputURL, atomically: true, encoding: .utf8)
         case "html":
-            try DocumentationGenerator.html(title: model.title, pages: pages).write(to: outputURL, atomically: true, encoding: .utf8)
+            let adrs = (try? PackageIO.readADRs(from: input)) ?? []
+            try DocumentationGenerator.html(title: model.title, pages: pages, adrs: adrs).write(to: outputURL, atomically: true, encoding: .utf8)
         default:
             throw ValidationError("Unknown format \"\(format)\". Supported: png, pdf, svg, mermaid, plantuml, dot, yaml, sql, markdown, html.")
         }

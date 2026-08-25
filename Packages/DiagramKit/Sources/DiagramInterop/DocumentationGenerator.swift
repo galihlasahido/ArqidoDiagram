@@ -8,7 +8,7 @@ import DiagramModel
 /// generator is what makes "Documentation" a real, always-available
 /// feature rather than one gated behind AI setup.
 public enum DocumentationGenerator {
-    public static func markdown(title: String, pages: [DiagramPage]) -> String {
+    public static func markdown(title: String, pages: [DiagramPage], adrs: [ArchitectureDecisionRecord] = []) -> String {
         var lines = ["# \(title)", ""]
 
         for page in pages {
@@ -23,6 +23,15 @@ public enum DocumentationGenerator {
             }
         }
 
+        if !adrs.isEmpty {
+            lines.append("## Architecture Decision Records")
+            lines.append("")
+            for adr in adrs.sorted(by: { $0.number < $1.number }) {
+                lines.append(adr.markdown)
+                lines.append("")
+            }
+        }
+
         return lines.joined(separator: "\n") + "\n"
     }
 
@@ -30,7 +39,7 @@ public enum DocumentationGenerator {
     /// the same node data rather than by parsing the Markdown text back —
     /// two independent renderers of one shared field list, so nothing can
     /// silently drift between the two formats.
-    public static func html(title: String, pages: [DiagramPage]) -> String {
+    public static func html(title: String, pages: [DiagramPage], adrs: [ArchitectureDecisionRecord] = []) -> String {
         var body = "<h1>\(escapeHTML(title))</h1>\n"
         for page in pages {
             let nodes = page.nodeZOrder.compactMap { page.nodes[$0] }
@@ -40,6 +49,20 @@ public enum DocumentationGenerator {
             }
             for node in nodes {
                 body += htmlSection(for: node, headingTag: pages.count > 1 ? "h3" : "h2")
+            }
+        }
+        if !adrs.isEmpty {
+            body += "<h2>Architecture Decision Records</h2>\n"
+            for adr in adrs.sorted(by: { $0.number < $1.number }) {
+                body += "<h3>ADR-\(String(format: "%03d", adr.number)): \(escapeHTML(adr.title))</h3>\n"
+                body += "<p><strong>Status:</strong> \(escapeHTML(adr.status.displayName))</p>\n"
+                if !adr.context.isEmpty { body += "<p><strong>Context:</strong> \(escapeHTML(adr.context))</p>\n" }
+                if !adr.decision.isEmpty { body += "<p><strong>Decision:</strong> \(escapeHTML(adr.decision))</p>\n" }
+                if !adr.consequences.isEmpty {
+                    body += "<p><strong>Consequences:</strong></p>\n<ul>\n"
+                    for consequence in adr.consequences { body += "<li>\(escapeHTML(consequence))</li>\n" }
+                    body += "</ul>\n"
+                }
             }
         }
         return "<!DOCTYPE html>\n<html><head><meta charset=\"utf-8\"><title>\(escapeHTML(title))</title></head><body>\n\(body)</body></html>\n"

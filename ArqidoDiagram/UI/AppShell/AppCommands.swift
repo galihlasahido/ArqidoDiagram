@@ -83,6 +83,13 @@ struct AppCommands: Commands {
                 NotificationCenter.default.post(name: .toggleVersionHistory, object: nil)
             }
             .keyboardShortcut("h", modifiers: [.command, .shift])
+
+            Divider()
+
+            Button("Show Architecture Decision Records") {
+                NotificationCenter.default.post(name: .toggleADRPanel, object: nil)
+            }
+            .keyboardShortcut("r", modifiers: [.command, .shift])
         }
 
         CommandGroup(replacing: .undoRedo) {
