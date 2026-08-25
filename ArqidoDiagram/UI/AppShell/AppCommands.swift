@@ -49,6 +49,13 @@ struct AppCommands: Commands {
                 Button("PDF…") { NSApp.sendAction(Selector(("exportPDF:")), to: nil, from: nil) }
                 Button("SVG…") { NSApp.sendAction(Selector(("exportSVG:")), to: nil, from: nil) }
             }
+
+            Button("Set Document Password…") {
+                NSApp.sendAction(Selector(("setDocumentPassword:")), to: nil, from: nil)
+            }
+            Button("Remove Document Password…") {
+                NSApp.sendAction(Selector(("removeDocumentPassword:")), to: nil, from: nil)
+            }
         }
 
         CommandGroup(replacing: .undoRedo) {

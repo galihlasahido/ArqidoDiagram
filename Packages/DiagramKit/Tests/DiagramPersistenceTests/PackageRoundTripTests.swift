@@ -127,6 +127,54 @@ final class PackageRoundTripTests: XCTestCase {
         XCTAssertTrue(FileManager.default.fileExists(atPath: packageURL.appendingPathComponent("pages").path))
     }
 
+    func testEncryptedPackageRoundTripsWithTheCorrectPassword() throws {
+        let node = DiagramNode(type: .rectangle, position: Point2D(x: 10, y: 20), size: Size2D(width: 100, height: 60))
+        var page = DiagramPage(name: "Confidential", order: 0)
+        page.nodes = [node.id: node]
+        page.nodeZOrder = [node.id]
+        var document = DiagramDocumentModel.blank(title: "Secret Architecture", at: Date(timeIntervalSince1970: 0))
+        document.pages = [page.id: page]
+        document.pageOrder = [page.id]
+
+        let wrapper = try PackageWriter.fileWrapper(for: document, password: "sw0rdfish")
+        let decoded = try PackageReader.documentModel(from: wrapper, password: "sw0rdfish")
+
+        XCTAssertEqual(decoded.title, "Secret Architecture")
+        XCTAssertEqual(decoded.pages[page.id]?.nodes[node.id]?.type, .rectangle)
+    }
+
+    func testEncryptedPackageManifestStaysPlaintext() throws {
+        let document = DiagramDocumentModel.blank(title: "Secret Architecture", at: Date(timeIntervalSince1970: 0))
+        let wrapper = try PackageWriter.fileWrapper(for: document, password: "sw0rdfish")
+
+        let manifestData = try XCTUnwrap(wrapper.fileWrappers?["manifest.json"]?.regularFileContents)
+        let manifestString = String(data: manifestData, encoding: .utf8)
+        XCTAssertTrue(manifestString?.contains(document.documentID.uuidString) ?? false)
+
+        let documentJSONData = try XCTUnwrap(wrapper.fileWrappers?["document.json"]?.regularFileContents)
+        // Ciphertext is arbitrary bytes — it may not even decode as UTF-8
+        // at all, which is itself evidence it isn't plaintext JSON.
+        XCTAssertFalse(String(data: documentJSONData, encoding: .utf8)?.contains("Secret Architecture") ?? false)
+    }
+
+    func testEncryptedPackageWithoutPasswordThrows() throws {
+        let document = DiagramDocumentModel.blank(title: "Secret Architecture", at: Date(timeIntervalSince1970: 0))
+        let wrapper = try PackageWriter.fileWrapper(for: document, password: "sw0rdfish")
+
+        XCTAssertThrowsError(try PackageReader.documentModel(from: wrapper)) { error in
+            XCTAssertEqual(error as? PackageReadError, .encryptionPasswordRequired)
+        }
+    }
+
+    func testEncryptedPackageWithWrongPasswordThrows() throws {
+        let document = DiagramDocumentModel.blank(title: "Secret Architecture", at: Date(timeIntervalSince1970: 0))
+        let wrapper = try PackageWriter.fileWrapper(for: document, password: "sw0rdfish")
+
+        XCTAssertThrowsError(try PackageReader.documentModel(from: wrapper, password: "wrong")) { error in
+            XCTAssertEqual(error as? PackageReadError, .incorrectPassword)
+        }
+    }
+
     func testCurrentSchemaVersionRoundTripsWithoutMigration() throws {
         let document = DiagramDocumentModel.blank(at: Date(timeIntervalSince1970: 0))
         XCTAssertEqual(document.schemaVersion, DiagramDocumentModel.currentSchemaVersion)

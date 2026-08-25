@@ -19,6 +19,13 @@ import DiagramPersistence
 final class DiagramDocument: NSDocument, ObservableObject {
     @Published private(set) var model: DiagramDocumentModel
 
+    /// Set once the user chooses "Set Document Password…" or successfully
+    /// unlocks an already-encrypted document — in memory only, never
+    /// written into `model`/persisted directly (only `PackageWriter`'s
+    /// derived key ever touches disk, via `encryption.json`'s salt).
+    private var password: String?
+    var isEncrypted: Bool { password != nil }
+
     override init() {
         model = .blank(at: Date())
         super.init()
@@ -119,11 +126,39 @@ final class DiagramDocument: NSDocument, ObservableObject {
         // never touches the previously-saved on-disk package, and
         // NSDocument's standard package-write path (temp file + atomic
         // rename) handles on-disk atomicity on top of that.
-        return try PackageWriter.fileWrapper(for: model)
+        return try PackageWriter.fileWrapper(for: model, password: password)
     }
 
+    /// Runs on the main thread (the default for `canConcurrentlyReadDocuments
+    /// == false`, which this class doesn't override), so a synchronous
+    /// modal password prompt here is safe — the same reasoning
+    /// `DiagramCanvasView.saveSelectionAsComponent`'s `NSAlert` relies on.
     override func read(from fileWrapper: FileWrapper, ofType typeName: String) throws {
-        model = try PackageReader.documentModel(from: fileWrapper)
+        let peek = try PackageReader.peekManifest(from: fileWrapper)
+        guard peek.isEncrypted else {
+            model = try PackageReader.documentModel(from: fileWrapper)
+            return
+        }
+
+        if let savedPassword = KeychainPasswordStore.load(for: peek.documentID),
+           let decoded = try? PackageReader.documentModel(from: fileWrapper, password: savedPassword) {
+            model = decoded
+            password = savedPassword
+            return
+        }
+
+        while true {
+            guard let entered = promptForExistingPassword(documentID: peek.documentID) else {
+                throw PackageReadError.encryptionPasswordRequired
+            }
+            do {
+                model = try PackageReader.documentModel(from: fileWrapper, password: entered)
+                password = entered
+                return
+            } catch PackageReadError.incorrectPassword {
+                continue
+            }
+        }
     }
 
     override func canAsynchronouslyWrite(
@@ -132,5 +167,93 @@ final class DiagramDocument: NSDocument, ObservableObject {
         for saveOperation: NSDocument.SaveOperationType
     ) -> Bool {
         true
+    }
+
+    // MARK: - Document encryption
+    //
+    // Spec §SECURITY: "Optional encrypted documents" + "macOS Keychain".
+    // AES-GCM content encryption lives in DiagramPersistence
+    // (DocumentEncryption/PackageWriter/PackageReader) — this is only the
+    // password-prompt/Keychain-glue layer, kept at the app-target edge
+    // since NSAlert has no place in a Foundation-only package module.
+
+    @objc func setDocumentPassword(_ sender: Any?) {
+        guard let entered = promptForNewPassword(documentID: model.documentID) else { return }
+        password = entered
+        updateChangeCount(.changeDone)
+    }
+
+    @objc func removeDocumentPassword(_ sender: Any?) {
+        guard password != nil else { return }
+        let alert = NSAlert()
+        alert.messageText = "Remove Document Password?"
+        alert.informativeText = "The document will be saved unencrypted from now on."
+        alert.addButton(withTitle: "Remove")
+        alert.addButton(withTitle: "Cancel")
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        password = nil
+        KeychainPasswordStore.delete(for: model.documentID)
+        updateChangeCount(.changeDone)
+    }
+
+    private func promptForNewPassword(documentID: UUID) -> String? {
+        let alert = NSAlert()
+        alert.messageText = "Set Document Password"
+        alert.informativeText = "This document's content will be encrypted with this password. There is no way to recover a lost password."
+        alert.addButton(withTitle: "Set Password")
+        alert.addButton(withTitle: "Cancel")
+
+        let passwordField = NSSecureTextField(frame: NSRect(x: 0, y: 56, width: 280, height: 24))
+        passwordField.placeholderString = "Password"
+        let confirmField = NSSecureTextField(frame: NSRect(x: 0, y: 28, width: 280, height: 24))
+        confirmField.placeholderString = "Confirm Password"
+        let rememberCheckbox = NSButton(checkboxWithTitle: "Save in Keychain", target: nil, action: nil)
+        rememberCheckbox.frame = NSRect(x: 0, y: 0, width: 280, height: 20)
+        rememberCheckbox.state = .on
+
+        let accessory = NSView(frame: NSRect(x: 0, y: 0, width: 280, height: 84))
+        accessory.addSubview(passwordField)
+        accessory.addSubview(confirmField)
+        accessory.addSubview(rememberCheckbox)
+        alert.accessoryView = accessory
+        alert.window.initialFirstResponder = passwordField
+
+        guard alert.runModal() == .alertFirstButtonReturn else { return nil }
+        guard !passwordField.stringValue.isEmpty, passwordField.stringValue == confirmField.stringValue else {
+            let errorAlert = NSAlert()
+            errorAlert.messageText = "Passwords Don't Match"
+            errorAlert.informativeText = "Enter the same password in both fields."
+            errorAlert.runModal()
+            return nil
+        }
+        if rememberCheckbox.state == .on {
+            KeychainPasswordStore.save(password: passwordField.stringValue, for: documentID)
+        }
+        return passwordField.stringValue
+    }
+
+    private func promptForExistingPassword(documentID: UUID) -> String? {
+        let alert = NSAlert()
+        alert.messageText = "Enter Document Password"
+        alert.informativeText = "This document is encrypted."
+        alert.addButton(withTitle: "Unlock")
+        alert.addButton(withTitle: "Cancel")
+
+        let passwordField = NSSecureTextField(frame: NSRect(x: 0, y: 28, width: 280, height: 24))
+        passwordField.placeholderString = "Password"
+        let rememberCheckbox = NSButton(checkboxWithTitle: "Save in Keychain", target: nil, action: nil)
+        rememberCheckbox.frame = NSRect(x: 0, y: 0, width: 280, height: 20)
+
+        let accessory = NSView(frame: NSRect(x: 0, y: 0, width: 280, height: 56))
+        accessory.addSubview(passwordField)
+        accessory.addSubview(rememberCheckbox)
+        alert.accessoryView = accessory
+        alert.window.initialFirstResponder = passwordField
+
+        guard alert.runModal() == .alertFirstButtonReturn, !passwordField.stringValue.isEmpty else { return nil }
+        if rememberCheckbox.state == .on {
+            KeychainPasswordStore.save(password: passwordField.stringValue, for: documentID)
+        }
+        return passwordField.stringValue
     }
 }
