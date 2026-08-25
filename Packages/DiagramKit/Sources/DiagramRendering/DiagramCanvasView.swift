@@ -1,6 +1,7 @@
 import AppKit
 import DiagramModel
 import DiagramCommands
+import DiagramLayout
 
 /// The infinite diagram canvas: a real `NSView` drawing via Core Graphics,
 /// never SwiftUI `Canvas` — per the Visual/UI Style requirements. Draws only
@@ -413,6 +414,56 @@ public final class DiagramCanvasView: NSView {
 
         perform(CompositeCommand([AddNodesCommand(nodes: newNodes), AddEdgesCommand(edges: newEdges)]), actionName: "Insert Component")
         updateSelectionFromInteraction(Set(newNodes.map(\.id)))
+    }
+
+    // MARK: - Auto layout
+
+    @objc public func applyHierarchicalLayout(_ sender: Any?) { applyLayout(LayoutKind.hierarchical.engine) }
+    @objc public func applyTreeLayout(_ sender: Any?) { applyLayout(LayoutKind.tree.engine) }
+    @objc public func applyGridLayout(_ sender: Any?) { applyLayout(LayoutKind.grid.engine) }
+    @objc public func applyForceDirectedLayout(_ sender: Any?) { applyLayout(LayoutKind.forceDirected.engine) }
+    @objc public func applyCircularLayout(_ sender: Any?) { applyLayout(LayoutKind.circular.engine) }
+    @objc public func applyOrthogonalLayout(_ sender: Any?) { applyLayout(LayoutKind.orthogonal.engine) }
+
+    /// Runs `engine` against the whole page and diffs its result against
+    /// the live scene, committing only what actually changed as one
+    /// `CompositeCommand` — so a layout that only moves half the nodes
+    /// (e.g. `TreeLayoutEngine` parking unreachable nodes) doesn't record a
+    /// spurious no-op undo entry for everything else.
+    private func applyLayout(_ engine: any LayoutEngine) {
+        guard !scene.nodes.isEmpty else { return }
+        let inputPage = DiagramPage(
+            id: scene.pageID,
+            name: "",
+            order: 0,
+            nodes: scene.nodes,
+            edges: scene.edges,
+            groups: scene.groups,
+            nodeZOrder: scene.nodeZOrder,
+            edgeZOrder: scene.edgeZOrder
+        )
+        let outputPage = engine.layout(inputPage)
+
+        var nodeBefore: [NodeID: DiagramNode] = [:]
+        var nodeAfter: [NodeID: DiagramNode] = [:]
+        for (id, newNode) in outputPage.nodes {
+            guard let oldNode = scene.nodes[id], oldNode != newNode else { continue }
+            nodeBefore[id] = oldNode
+            nodeAfter[id] = newNode
+        }
+        var edgeBefore: [EdgeID: DiagramEdge] = [:]
+        var edgeAfter: [EdgeID: DiagramEdge] = [:]
+        for (id, newEdge) in outputPage.edges {
+            guard let oldEdge = scene.edges[id], oldEdge != newEdge else { continue }
+            edgeBefore[id] = oldEdge
+            edgeAfter[id] = newEdge
+        }
+        guard !nodeAfter.isEmpty || !edgeAfter.isEmpty else { return }
+
+        var commands: [any Command] = []
+        if !nodeAfter.isEmpty { commands.append(UpdateNodesCommand(before: nodeBefore, after: nodeAfter)) }
+        if !edgeAfter.isEmpty { commands.append(UpdateEdgesCommand(before: edgeBefore, after: edgeAfter)) }
+        perform(CompositeCommand(commands), actionName: "\(engine.displayName) Layout")
     }
 
     private static let pasteboardType = NSPasteboard.PasteboardType("com.arqido.diagram.nodes")

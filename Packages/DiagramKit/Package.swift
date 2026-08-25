@@ -13,7 +13,8 @@ let package = Package(
         .library(name: "DiagramPersistence", targets: ["DiagramPersistence"]),
         .library(name: "DiagramRendering", targets: ["DiagramRendering"]),
         .library(name: "DiagramInteraction", targets: ["DiagramInteraction"]),
-        .library(name: "DiagramExport", targets: ["DiagramExport"])
+        .library(name: "DiagramExport", targets: ["DiagramExport"]),
+        .library(name: "DiagramLayout", targets: ["DiagramLayout"])
     ],
     targets: [
         // Protocol-only seams for later phases (Layout, Validation, Import, AI)
@@ -29,6 +30,16 @@ let package = Package(
         // .diagram package read/write, schema migration.
         .target(name: "DiagramPersistence", dependencies: ["DiagramModel"]),
 
+        // Auto Layout: an abstraction over concrete layout algorithms
+        // (Hierarchical/Tree/Grid/Force-Directed/Circular/Orthogonal), each
+        // a pure `DiagramPage -> DiagramPage` transform — no AppKit/SwiftUI,
+        // so the algorithms are unit-testable without a canvas and the UI
+        // never hard-codes layout math itself (see the spec's Auto Layout
+        // requirement). Lives outside DiagramFoundation because it needs a
+        // concrete `DiagramModel.DiagramPage`, and DiagramFoundation sits
+        // *below* DiagramModel in the dependency graph.
+        .target(name: "DiagramLayout", dependencies: ["DiagramModel"]),
+
         // NSView-based canvas, Core Graphics drawing, spatial index,
         // selection/move/resize/rotate interaction. AppKit, not SwiftUI.
         // Depends on DiagramCommands: interaction lives directly on
@@ -36,7 +47,7 @@ let package = Package(
         // layer (see that file's doc comment for why) — DiagramInteraction
         // remains reserved for a genuinely distinct future mode
         // (draw-connector, step 13).
-        .target(name: "DiagramRendering", dependencies: ["DiagramModel", "DiagramCommands"]),
+        .target(name: "DiagramRendering", dependencies: ["DiagramModel", "DiagramCommands", "DiagramLayout"]),
 
         // Reserved: draw-connector tool state machine (step 13).
         .target(
@@ -51,6 +62,7 @@ let package = Package(
         .testTarget(name: "DiagramPersistenceTests", dependencies: ["DiagramPersistence"]),
         .testTarget(name: "DiagramCommandsTests", dependencies: ["DiagramCommands"]),
         .testTarget(name: "DiagramRenderingTests", dependencies: ["DiagramRendering"]),
-        .testTarget(name: "DiagramExportTests", dependencies: ["DiagramExport"])
+        .testTarget(name: "DiagramExportTests", dependencies: ["DiagramExport"]),
+        .testTarget(name: "DiagramLayoutTests", dependencies: ["DiagramLayout"])
     ]
 )

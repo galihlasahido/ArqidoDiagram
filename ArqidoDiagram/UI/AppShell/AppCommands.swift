@@ -155,6 +155,15 @@ struct AppCommands: Commands {
             Button("Distribute Vertically") { NSApp.sendAction(Selector(("distributeVertically:")), to: nil, from: nil) }
         }
 
+        CommandMenu("Layout") {
+            Button("Hierarchical") { NSApp.sendAction(Selector(("applyHierarchicalLayout:")), to: nil, from: nil) }
+            Button("Tree") { NSApp.sendAction(Selector(("applyTreeLayout:")), to: nil, from: nil) }
+            Button("Grid") { NSApp.sendAction(Selector(("applyGridLayout:")), to: nil, from: nil) }
+            Button("Force-Directed") { NSApp.sendAction(Selector(("applyForceDirectedLayout:")), to: nil, from: nil) }
+            Button("Circular") { NSApp.sendAction(Selector(("applyCircularLayout:")), to: nil, from: nil) }
+            Button("Orthogonal") { NSApp.sendAction(Selector(("applyOrthogonalLayout:")), to: nil, from: nil) }
+        }
+
         CommandGroup(after: .toolbar) {
             // Real, visibly-disabled affordance rather than a hidden or
             // faked feature — ⌘K is in the spec's minimum shortcut list, but
