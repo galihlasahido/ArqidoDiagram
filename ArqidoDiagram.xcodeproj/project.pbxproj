@@ -58,6 +58,7 @@
 		F3EF981657B636BA0B2A4E32 /* CanvasHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */; };
 		F64DF93248D5BAE9652200AE /* DiagramAI in Frameworks */ = {isa = PBXBuildFile; productRef = 137FB470EC31A57938C799FF /* DiagramAI */; };
 		F71E181EBCD0A69E7118DCA8 /* CustomComponentStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = C2030497A775908C64E078A6 /* CustomComponentStore.swift */; };
+		FD7697E5A90EAE037870E1C5 /* ConnectorStyleModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 235EEC8180A742A982022CC7 /* ConnectorStyleModel.swift */; };
 		FEF7AB1A4FFBB17D7C52DC0A /* PageTabsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = D069B21A8816480382A0EAEB /* PageTabsView.swift */; };
 /* End PBXBuildFile section */
 
@@ -69,6 +70,7 @@
 		134895D85CC42FEDEEE4E71A /* VersionHistoryPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionHistoryPanelView.swift; sourceTree = "<group>"; };
 		142C7AED24EC297399F039B6 /* ValidationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationStore.swift; sourceTree = "<group>"; };
 		219837F48E9DD01413C6FBDC /* ArqidoDiagramApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArqidoDiagramApp.swift; sourceTree = "<group>"; };
+		235EEC8180A742A982022CC7 /* ConnectorStyleModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = ConnectorStyleModel.swift; sourceTree = "<group>"; };
 		25064BA4FC3F3E47A7952A5F /* AppCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCommands.swift; sourceTree = "<group>"; };
 		2753106E9E9AA3744630F753 /* PresentationHUDView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PresentationHUDView.swift; sourceTree = "<group>"; };
 		325E12829E933C04377339CB /* ShapeInsertionRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeInsertionRequest.swift; sourceTree = "<group>"; };
@@ -246,6 +248,7 @@
 				9AAE55FF9ECC8FA45FA1BB7C /* InteropCoordinator.swift */,
 				7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */,
 				325E12829E933C04377339CB /* ShapeInsertionRequest.swift */,
+				235EEC8180A742A982022CC7 /* ConnectorStyleModel.swift */,
 			);
 			path = Canvas;
 			sourceTree = "<group>";
@@ -441,6 +444,7 @@
 				7FC3C56F22DFCEF5F1EA4084 /* PresentationFramePanelView.swift in Sources */,
 				97CCE3EF96794E7B89D3FB65 /* PresentationWindowController.swift in Sources */,
 				BFE6821B9F180FE18E9360D8 /* PresentationHUDView.swift in Sources */,
+				FD7697E5A90EAE037870E1C5 /* ConnectorStyleModel.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

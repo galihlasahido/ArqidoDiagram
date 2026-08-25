@@ -9,6 +9,7 @@ struct StatusBarView: View {
     @ObservedObject var document: DiagramDocument
     @ObservedObject var canvasStatus: CanvasStatusModel
     @ObservedObject var selection: SelectionModel
+    @ObservedObject var connectorStyle: ConnectorStyleModel
     @Binding var activePageID: PageID?
 
     private var objectCount: Int {
@@ -20,6 +21,7 @@ struct StatusBarView: View {
         HStack(spacing: 16) {
             PageTabsView(document: document, activePageID: $activePageID)
             Spacer()
+            connectorStylePicker
             Text("Selection: \(selection.selectedNodeIDs.count)")
                 .monospacedDigit()
             Text("Objects: \(objectCount)")
@@ -32,5 +34,20 @@ struct StatusBarView: View {
         .padding(.horizontal, 12)
         .padding(.vertical, 6)
         .background(Color(nsColor: .controlBackgroundColor))
+    }
+
+    /// Sets which `RoutingStyle` the drag-to-connect tool draws *new*
+    /// connectors with (`DiagramCanvasView.defaultRoutingStyle`) — to
+    /// change an existing connector's routing instead, select it and use
+    /// the Inspector's Connector section.
+    private var connectorStylePicker: some View {
+        Picker("Line", selection: $connectorStyle.routingStyle) {
+            ForEach(RoutingStyle.allCases, id: \.self) { style in
+                Text(style.displayName).tag(style)
+            }
+        }
+        .pickerStyle(.menu)
+        .fixedSize()
+        .help("Line style for new connectors")
     }
 }

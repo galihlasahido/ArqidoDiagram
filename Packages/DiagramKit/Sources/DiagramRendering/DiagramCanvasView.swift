@@ -40,6 +40,26 @@ public final class DiagramCanvasView: NSView {
     /// SwiftUI side and echoing it back would just be a no-op round trip.
     public var onSelectionChange: ((Set<NodeID>) -> Void)?
 
+    /// The edge counterpart of `onSelectionChange` — fired only from user
+    /// interaction (clicking an edge), never from `applyExternalEdgeSelection`.
+    public var onEdgeSelectionChange: ((Set<EdgeID>) -> Void)?
+
+    /// Spec's graph-paper canvas background — minor/major grid lines drawn
+    /// in content space (see `drawGrid`), so they pan/zoom with the content
+    /// exactly like nodes and edges do.
+    public var showGrid = true {
+        didSet {
+            guard showGrid != oldValue else { return }
+            needsDisplay = true
+        }
+    }
+
+    /// Which `RoutingStyle` new connectors are drawn with (see `endDrag`'s
+    /// `.connector` case in `mouseUp`) — set by the app target from a
+    /// toolbar picker. Existing edges keep whatever routing they were
+    /// created with; this only affects edges drawn *after* it changes.
+    public var defaultRoutingStyle: RoutingStyle = .straight
+
     /// Fired once per *committed* mutation (a completed drag, delete,
     /// add-shape, ...) — never per intermediate live-preview frame. The app
     /// target uses this to pull `currentPageSnapshot(...)` and write it
@@ -66,6 +86,11 @@ public final class DiagramCanvasView: NSView {
     public override var undoManager: UndoManager? { documentUndoManager }
 
     public private(set) var selection: Set<NodeID> = []
+
+    /// Node and edge selection are mutually exclusive — clicking an edge
+    /// clears the node selection and vice versa — so the Inspector only
+    /// ever has to render one or the other, never both at once.
+    public private(set) var edgeSelection: Set<EdgeID> = []
 
     public override init(frame frameRect: NSRect) {
         scene = SceneStore(page: DiagramPage(name: "", order: 0))
@@ -128,6 +153,10 @@ public final class DiagramCanvasView: NSView {
         if prunedSelection != selection {
             updateSelectionFromInteraction(prunedSelection)
         }
+        let prunedEdgeSelection = edgeSelection.intersection(scene.edges.keys)
+        if prunedEdgeSelection != edgeSelection {
+            updateEdgeSelectionFromInteraction(prunedEdgeSelection)
+        }
         needsDisplay = true
     }
 
@@ -170,6 +199,10 @@ public final class DiagramCanvasView: NSView {
         let prunedSelection = selection.intersection(scene.nodes.keys)
         if prunedSelection != selection {
             updateSelectionFromInteraction(prunedSelection)
+        }
+        let prunedEdgeSelection = edgeSelection.intersection(scene.edges.keys)
+        if prunedEdgeSelection != edgeSelection {
+            updateEdgeSelectionFromInteraction(prunedEdgeSelection)
         }
         needsDisplay = true
         onSceneChanged?()
@@ -253,6 +286,25 @@ public final class DiagramCanvasView: NSView {
         perform(UpdateNodesCommand(before: before, after: after), actionName: actionName)
     }
 
+    /// The edge counterpart of `updateSelectedNodes` — used by the
+    /// Inspector's Connector section to change routing/line-style/arrows on
+    /// every currently-selected edge (in practice always exactly one, since
+    /// edge selection is single-select only, see `mouseDown`).
+    public func updateSelectedEdges(actionName: String, _ transform: (inout DiagramEdge) -> Void) {
+        guard !edgeSelection.isEmpty else { return }
+        var before: [EdgeID: DiagramEdge] = [:]
+        var after: [EdgeID: DiagramEdge] = [:]
+        for id in edgeSelection {
+            guard let original = scene.edges[id] else { continue }
+            var updated = original
+            transform(&updated)
+            before[id] = original
+            after[id] = updated
+        }
+        guard before != after else { return }
+        perform(UpdateEdgesCommand(before: before, after: after), actionName: actionName)
+    }
+
     private func syncSpatialIndex(for ids: [AnyObjectID]) {
         for id in ids {
             guard case .node(let nodeID) = id else { continue }
@@ -305,6 +357,13 @@ public final class DiagramCanvasView: NSView {
     // MARK: - Delete / duplicate / copy / paste / z-order / select all
 
     @objc public func delete(_ sender: Any?) {
+        if !edgeSelection.isEmpty {
+            let removedEdges = edgeSelection.compactMap { scene.edges[$0] }.filter { !$0.isLocked }
+            guard !removedEdges.isEmpty else { return }
+            perform(RemoveEdgesCommand(edges: removedEdges), actionName: "Delete")
+            updateEdgeSelectionFromInteraction(edgeSelection.subtracting(removedEdges.map(\.id)))
+            return
+        }
         guard !selection.isEmpty else { return }
         // Locked nodes are excluded, not deleted-then-warned-about — the
         // remaining (still-locked) selection stays selected afterward so
@@ -747,6 +806,38 @@ public final class DiagramCanvasView: NSView {
         onSelectionChange?(selection)
     }
 
+    /// SwiftUI -> canvas direction for edge selection — the edge
+    /// counterpart of `applyExternalSelection`.
+    public func applyExternalEdgeSelection(_ ids: Set<EdgeID>) {
+        guard edgeSelection != ids else { return }
+        edgeSelection = ids
+        needsDisplay = true
+    }
+
+    private func updateEdgeSelectionFromInteraction(_ ids: Set<EdgeID>) {
+        guard edgeSelection != ids else { return }
+        edgeSelection = ids
+        needsDisplay = true
+        onEdgeSelectionChange?(edgeSelection)
+    }
+
+    /// Hit-tests an edge by stroking a generous, zoom-independent width
+    /// (8pt in view space) around its resolved path and testing
+    /// containment — works uniformly for every `RoutingStyle`, including
+    /// the curved/isometric/entity-relation cases, without needing a
+    /// per-routing distance-to-segment formula.
+    private func topmostEdge(at contentPoint: CGPoint) -> EdgeID? {
+        let hitWidth = 8 / viewport.scale
+        for edge in scene.edges.values.sorted(by: { $0.zIndex > $1.zIndex }) {
+            guard !edge.isHidden else { continue }
+            guard let (source, target) = EdgeGeometry.resolvedEndpoints(for: edge, nodes: scene.nodes) else { continue }
+            let path = EdgeGeometry.path(from: source, to: target, routing: edge.routing)
+            let stroked = path.copy(strokingWithWidth: hitWidth, lineCap: .round, lineJoin: .round, miterLimit: 1)
+            if stroked.contains(contentPoint) { return edge.id }
+        }
+        return nil
+    }
+
     /// Exact hit-test: `SpatialGrid` narrows to candidates near the point,
     /// then `ShapeGeometry`'s path (the same one `draw(_:in:)` uses, so
     /// hit-testing and drawing can never drift apart) decides which
@@ -958,6 +1049,7 @@ public final class DiagramCanvasView: NSView {
         }
 
         if let hitID = topmostNode(at: contentPoint) {
+            if !edgeSelection.isEmpty { updateEdgeSelectionFromInteraction([]) }
             let hitGroup = expandedForGrouping([hitID])
             if isExtending {
                 var updated = selection
@@ -974,9 +1066,14 @@ public final class DiagramCanvasView: NSView {
                 })
                 dragMode = .move(startPositions: startPositions, startContentPoint: contentPoint)
             }
+        } else if !isExtending, let edgeID = topmostEdge(at: contentPoint) {
+            if !selection.isEmpty { updateSelectionFromInteraction([]) }
+            updateEdgeSelectionFromInteraction([edgeID])
+            dragMode = .none
         } else {
             if !isExtending {
                 updateSelectionFromInteraction([])
+                updateEdgeSelectionFromInteraction([])
             }
             dragMode = .marquee
             marqueeStartView = viewPoint
@@ -1110,7 +1207,7 @@ public final class DiagramCanvasView: NSView {
             } else {
                 target = .point(Point2D(x: currentContentPoint.x, y: currentContentPoint.y))
             }
-            let edge = DiagramEdge(source: .node(sourceID, portID: nil), target: target)
+            let edge = DiagramEdge(source: .node(sourceID, portID: nil), target: target, routing: defaultRoutingStyle)
             perform(AddEdgesCommand(edges: [edge]), actionName: "Connect")
 
         case .pan:
@@ -1139,6 +1236,11 @@ public final class DiagramCanvasView: NSView {
         context.saveGState()
         context.concatenate(viewport.contentToViewTransform)
 
+        let contentDirtyRect = viewport.viewToContent(rect: dirtyRect)
+        if showGrid {
+            drawGrid(in: context, contentRect: contentDirtyRect)
+        }
+
         // Edges draw behind nodes — endpoints are clipped to the node
         // boundary (EdgeGeometry.clippedPoint), so drawing nodes on top
         // covers any line stub that would otherwise poke past the edge.
@@ -1147,8 +1249,10 @@ public final class DiagramCanvasView: NSView {
         for edge in scene.edges.values.sorted(by: { $0.zIndex < $1.zIndex }) {
             PageRenderer.drawEdge(edge, nodes: scene.nodes, in: context, scale: viewport.scale)
         }
+        if !edgeSelection.isEmpty {
+            drawEdgeSelectionHighlights(in: context)
+        }
 
-        let contentDirtyRect = viewport.viewToContent(rect: dirtyRect)
         let candidateIDs = spatialIndex.query(contentDirtyRect)
         let visibleNodes = candidateIDs.compactMap { scene.nodes[$0] }.sorted { $0.zIndex < $1.zIndex }
         for node in visibleNodes {
@@ -1160,7 +1264,7 @@ public final class DiagramCanvasView: NSView {
             context.setStrokeColor(NSColor.controlAccentColor.cgColor)
             context.setLineWidth(1.5 / viewport.scale)
             context.setLineDash(phase: 0, lengths: [6 / viewport.scale, 4 / viewport.scale])
-            context.addPath(EdgeGeometry.path(from: connectorPreview.0, to: connectorPreview.1, routing: .straight))
+            context.addPath(EdgeGeometry.path(from: connectorPreview.0, to: connectorPreview.1, routing: defaultRoutingStyle))
             context.strokePath()
             context.restoreGState()
         }
@@ -1180,6 +1284,77 @@ public final class DiagramCanvasView: NSView {
         if let marqueeRect = marqueeViewRect {
             drawMarquee(marqueeRect, in: context)
         }
+    }
+
+    // MARK: - Grid
+
+    private static let minorGridSpacing: CGFloat = 20
+    private static let majorGridEveryNMinorLines = 5
+
+    /// Minor lines are skipped once they'd render closer together than
+    /// `minimumViewSpacing` — otherwise zooming out on a large canvas would
+    /// mean drawing thousands of sub-pixel lines for no visible benefit.
+    /// Major lines fall back the same way once *they* get too dense too.
+    private static let minimumViewSpacing: CGFloat = 4
+
+    /// `.gridColor` is the same system-dynamic color AppKit's own table/
+    /// outline views use for hairlines — it already tracks light/dark
+    /// correctly with no extra work. The major line reuses it at higher
+    /// alpha rather than a different color, so the two stay visually
+    /// related instead of competing.
+    private static let minorGridColor = NSColor.gridColor.withAlphaComponent(0.5)
+    private static let majorGridColor = NSColor.gridColor.withAlphaComponent(1.0)
+
+    private func drawGrid(in context: CGContext, contentRect: CGRect) {
+        let majorSpacing = Self.minorGridSpacing * CGFloat(Self.majorGridEveryNMinorLines)
+        if Self.minorGridSpacing * viewport.scale >= Self.minimumViewSpacing {
+            drawGridLines(spacing: Self.minorGridSpacing, color: Self.minorGridColor, in: context, contentRect: contentRect)
+        }
+        if majorSpacing * viewport.scale >= Self.minimumViewSpacing {
+            drawGridLines(spacing: majorSpacing, color: Self.majorGridColor, in: context, contentRect: contentRect)
+        }
+    }
+
+    private func drawGridLines(spacing: CGFloat, color: NSColor, in context: CGContext, contentRect: CGRect) {
+        guard spacing > 0 else { return }
+        context.saveGState()
+        context.setStrokeColor(color.cgColor)
+        context.setLineWidth(1 / viewport.scale)
+
+        var x = floor(contentRect.minX / spacing) * spacing
+        while x <= contentRect.maxX {
+            context.move(to: CGPoint(x: x, y: contentRect.minY))
+            context.addLine(to: CGPoint(x: x, y: contentRect.maxY))
+            x += spacing
+        }
+        var y = floor(contentRect.minY / spacing) * spacing
+        while y <= contentRect.maxY {
+            context.move(to: CGPoint(x: contentRect.minX, y: y))
+            context.addLine(to: CGPoint(x: contentRect.maxX, y: y))
+            y += spacing
+        }
+        context.strokePath()
+        context.restoreGState()
+    }
+
+    /// Drawn in content space (inside the same `contentToViewTransform`
+    /// block as the edges themselves — unlike node/marquee selection chrome,
+    /// which is drawn in view space), so a curved/isometric/entity-relation
+    /// edge's highlight follows its actual on-screen shape exactly rather
+    /// than approximating it with a straight line or bounding box.
+    private func drawEdgeSelectionHighlights(in context: CGContext) {
+        context.saveGState()
+        context.setStrokeColor(NSColor.controlAccentColor.cgColor)
+        context.setLineWidth(4 / viewport.scale)
+        context.setLineCap(.round)
+        context.setLineJoin(.round)
+        for id in edgeSelection {
+            guard let edge = scene.edges[id],
+                  let (source, target) = EdgeGeometry.resolvedEndpoints(for: edge, nodes: scene.nodes) else { continue }
+            context.addPath(EdgeGeometry.path(from: source, to: target, routing: edge.routing))
+        }
+        context.strokePath()
+        context.restoreGState()
     }
 
     private func drawSelectionHighlights(in context: CGContext) {

@@ -146,10 +146,7 @@ public enum PageRenderer {
 
     public static func drawEdge(_ edge: DiagramEdge, nodes: [NodeID: DiagramNode], in context: CGContext, scale: CGFloat = 1, dimAlpha: CGFloat = 1) {
         guard !edge.isHidden else { return }
-        let targetAim = aimPoint(for: edge.target, nodes: nodes)
-        let sourceAim = aimPoint(for: edge.source, nodes: nodes)
-        guard let source = EdgeGeometry.resolvedPoint(for: edge.source, nodes: nodes, towards: targetAim),
-              let target = EdgeGeometry.resolvedPoint(for: edge.target, nodes: nodes, towards: sourceAim) else { return }
+        guard let (source, target) = EdgeGeometry.resolvedEndpoints(for: edge, nodes: nodes) else { return }
 
         let path = EdgeGeometry.path(from: source, to: target, routing: edge.routing)
         context.saveGState()
@@ -180,12 +177,5 @@ public enum PageRenderer {
 
     private static func filled(_ style: ArrowheadStyle) -> Bool {
         style == .filled || style == .diamond || style == .circle
-    }
-
-    private static func aimPoint(for endpoint: EndpointRef, nodes: [NodeID: DiagramNode]) -> CGPoint {
-        switch endpoint {
-        case .point(let p): return CGPoint(x: p.x, y: p.y)
-        case .node(let id, _): return nodes[id]?.frame.center ?? .zero
-        }
     }
 }

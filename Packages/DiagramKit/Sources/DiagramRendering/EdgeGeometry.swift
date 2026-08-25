@@ -50,8 +50,46 @@ public enum EdgeGeometry {
             let c1 = CGPoint(x: (source.x + target.x) / 2, y: source.y)
             let c2 = CGPoint(x: (source.x + target.x) / 2, y: target.y)
             path.addCurve(to: target, control1: c1, control2: c2)
+        case .isometric:
+            // Two segments, each exactly along one of the isometric grid's
+            // two axes — A = (2,1), B = (2,-1) (the common 2:1-pixel-ratio
+            // convention). Solving `target - source = alpha*A + beta*B` for
+            // alpha (a 2x2 linear system, determinant -4) gives the one
+            // bend point that keeps both segments on-axis while still
+            // landing exactly on `target`, for any pair of points.
+            let dx = target.x - source.x
+            let dy = target.y - source.y
+            let alpha = (dx + 2 * dy) / 4
+            let bend = CGPoint(x: source.x + alpha * 2, y: source.y + alpha * 1)
+            path.addLine(to: bend)
+            path.addLine(to: target)
+        case .entityRelation:
+            let midX = (source.x + target.x) / 2
+            path.addLine(to: CGPoint(x: midX, y: source.y))
+            path.addLine(to: CGPoint(x: midX, y: target.y))
+            path.addLine(to: target)
         }
         return path
+    }
+
+    /// Resolves both endpoints of `edge` against `nodes` in one call — the
+    /// shared implementation `PageRenderer.drawEdge` and
+    /// `DiagramCanvasView`'s edge hit-testing/selection-highlight both use,
+    /// so "what's on screen" and "what gets picked/highlighted" can never
+    /// drift apart.
+    public static func resolvedEndpoints(for edge: DiagramEdge, nodes: [NodeID: DiagramNode]) -> (source: CGPoint, target: CGPoint)? {
+        let targetAim = aimPoint(for: edge.target, nodes: nodes)
+        let sourceAim = aimPoint(for: edge.source, nodes: nodes)
+        guard let source = resolvedPoint(for: edge.source, nodes: nodes, towards: targetAim),
+              let target = resolvedPoint(for: edge.target, nodes: nodes, towards: sourceAim) else { return nil }
+        return (source, target)
+    }
+
+    static func aimPoint(for endpoint: EndpointRef, nodes: [NodeID: DiagramNode]) -> CGPoint {
+        switch endpoint {
+        case .point(let p): return CGPoint(x: p.x, y: p.y)
+        case .node(let id, _): return nodes[id]?.frame.center ?? .zero
+        }
     }
 
     /// A small arrowhead at `tip`, pointing away from `from` — `nil` for

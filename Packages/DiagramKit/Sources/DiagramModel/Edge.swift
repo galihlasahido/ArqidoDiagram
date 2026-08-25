@@ -5,8 +5,27 @@ public enum EndpointRef: Codable, Hashable, Sendable {
     case point(Point2D)
 }
 
-public enum RoutingStyle: String, Codable, Sendable {
+public enum RoutingStyle: String, Codable, Sendable, CaseIterable {
     case straight, orthogonal, curved
+    /// Two segments, each following one of the two 2:1-pixel-ratio
+    /// isometric grid axes — the diagonal "pseudo-3D" connector look other
+    /// diagramming apps offer alongside orthogonal/curved.
+    case isometric
+    /// The classic ER-diagram "S"/"Z" stepped connector: exits the source
+    /// horizontally, jogs vertically at the horizontal midpoint, then
+    /// enters the target horizontally — distinct from `.orthogonal`'s
+    /// single right-angle bend.
+    case entityRelation
+
+    public var displayName: String {
+        switch self {
+        case .straight: return "Straight"
+        case .orthogonal: return "Orthogonal"
+        case .curved: return "Curved"
+        case .isometric: return "Isometric"
+        case .entityRelation: return "Entity Relation"
+        }
+    }
 }
 
 public struct EdgeLabel: Codable, Hashable, Sendable {

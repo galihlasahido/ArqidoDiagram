@@ -7,4 +7,8 @@ import DiagramModel
 /// the canvas itself depending on Combine/SwiftUI.
 final class SelectionModel: ObservableObject {
     @Published var selectedNodeIDs: Set<NodeID> = []
+    /// Node and edge selection are mutually exclusive (see
+    /// `DiagramCanvasView.edgeSelection`'s doc comment) — mirrored here the
+    /// same way `selectedNodeIDs` mirrors `DiagramCanvasView.selection`.
+    @Published var selectedEdgeIDs: Set<EdgeID> = []
 }

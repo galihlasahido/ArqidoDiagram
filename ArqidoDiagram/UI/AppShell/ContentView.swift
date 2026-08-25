@@ -9,6 +9,7 @@ struct ContentView: View {
     @StateObject private var inspectorBridge = InspectorBridge()
     @StateObject private var searchModel = SearchModel()
     @StateObject private var componentStore = CustomComponentStore()
+    @StateObject private var connectorStyle = ConnectorStyleModel()
     @StateObject private var validationModel = ValidationModel()
     @StateObject private var validationStore = ValidationStore()
     @StateObject private var versionHistoryModel = VersionHistoryModel()
@@ -33,6 +34,7 @@ struct ContentView: View {
                 shapeInsertion: shapeInsertion,
                 inspectorBridge: inspectorBridge,
                 componentStore: componentStore,
+                connectorStyle: connectorStyle,
                 activePageID: $activePageID
             )
             .navigationSplitViewColumnWidth(min: 400, ideal: 900)
@@ -75,7 +77,7 @@ struct ContentView: View {
                 .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 360)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            StatusBarView(document: document, canvasStatus: canvasStatus, selection: selection, activePageID: $activePageID)
+            StatusBarView(document: document, canvasStatus: canvasStatus, selection: selection, connectorStyle: connectorStyle, activePageID: $activePageID)
         }
         .onAppear {
             if activePageID == nil { activePageID = document.model.pageOrder.first }

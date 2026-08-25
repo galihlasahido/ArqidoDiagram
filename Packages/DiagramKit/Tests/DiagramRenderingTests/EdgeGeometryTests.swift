@@ -42,6 +42,72 @@ final class EdgeGeometryTests: XCTestCase {
         XCTAssertEqual(path.boundingBoxOfPath, CGRect(x: 0, y: 0, width: 100, height: 50))
     }
 
+    func testEntityRelationPathStaysWithinTheAxisAlignedBoundingBoxAndEndsAtTarget() {
+        let source = CGPoint(x: 0, y: 0)
+        let target = CGPoint(x: 100, y: 50)
+        let path = EdgeGeometry.path(from: source, to: target, routing: .entityRelation)
+        XCTAssertEqual(path.boundingBoxOfPath, CGRect(x: 0, y: 0, width: 100, height: 50))
+        XCTAssertEqual(path.currentPoint, target)
+    }
+
+    func testEntityRelationPathJogsAtTheHorizontalMidpoint() {
+        let source = CGPoint(x: 0, y: 0)
+        let target = CGPoint(x: 100, y: 50)
+        let path = EdgeGeometry.path(from: source, to: target, routing: .entityRelation)
+        var points: [CGPoint] = []
+        path.applyWithBlock { element in
+            if element.pointee.type != .closeSubpath {
+                points.append(element.pointee.points.pointee)
+            }
+        }
+        // move, line-to-(mid,source.y), line-to-(mid,target.y), line-to-target
+        XCTAssertEqual(points.count, 4)
+        XCTAssertEqual(points[1], CGPoint(x: 50, y: 0))
+        XCTAssertEqual(points[2], CGPoint(x: 50, y: 50))
+    }
+
+    func testIsometricPathEndsExactlyAtTarget() {
+        let source = CGPoint(x: 10, y: 20)
+        let target = CGPoint(x: 130, y: -40)
+        let path = EdgeGeometry.path(from: source, to: target, routing: .isometric)
+        XCTAssertEqual(path.currentPoint.x, target.x, accuracy: 0.01)
+        XCTAssertEqual(path.currentPoint.y, target.y, accuracy: 0.01)
+    }
+
+    func testIsometricPathSegmentsFollowTheIsometricAxes() {
+        let source = CGPoint(x: 0, y: 0)
+        let target = CGPoint(x: 120, y: 30)
+        let path = EdgeGeometry.path(from: source, to: target, routing: .isometric)
+        var points: [CGPoint] = []
+        path.applyWithBlock { element in
+            if element.pointee.type != .closeSubpath {
+                points.append(element.pointee.points.pointee)
+            }
+        }
+        XCTAssertEqual(points.count, 3)
+        let bend = points[1]
+        // Segment 1 (source -> bend) must lie on axis A = (2,1): slope 0.5.
+        XCTAssertEqual((bend.y - source.y) / (bend.x - source.x), 0.5, accuracy: 0.0001)
+        // Segment 2 (bend -> target) must lie on axis B = (2,-1): slope -0.5.
+        XCTAssertEqual((target.y - bend.y) / (target.x - bend.x), -0.5, accuracy: 0.0001)
+    }
+
+    func testResolvedEndpointsForNodeToNodeEdge() throws {
+        let a = DiagramNode(type: .rectangle, position: Point2D(x: 0, y: 0), size: Size2D(width: 100, height: 100))
+        let b = DiagramNode(type: .rectangle, position: Point2D(x: 300, y: 0), size: Size2D(width: 100, height: 100))
+        let nodes = [a.id: a, b.id: b]
+        let edge = DiagramEdge(source: .node(a.id, portID: nil), target: .node(b.id, portID: nil))
+
+        let resolved = try XCTUnwrap(EdgeGeometry.resolvedEndpoints(for: edge, nodes: nodes))
+        XCTAssertEqual(resolved.source.x, 100, accuracy: 0.01, "should exit A's right edge, towards B")
+        XCTAssertEqual(resolved.target.x, 300, accuracy: 0.01, "should enter B's left edge, coming from A")
+    }
+
+    func testResolvedEndpointsIsNilWhenANodeEndpointIsMissing() {
+        let edge = DiagramEdge(source: .node(NodeID(), portID: nil), target: .point(Point2D(x: 0, y: 0)))
+        XCTAssertNil(EdgeGeometry.resolvedEndpoints(for: edge, nodes: [:]))
+    }
+
     func testNoneArrowheadIsNil() {
         XCTAssertNil(EdgeGeometry.arrowheadPath(from: .zero, tip: CGPoint(x: 10, y: 0), style: .none))
     }

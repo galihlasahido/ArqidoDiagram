@@ -10,8 +10,9 @@ import DiagramRendering
 /// point canvas-driven edits use — Inspector edits are undoable exactly the
 /// same way.
 ///
-/// TODO: Connector section — deferred until edges are individually
-/// selectable (see DiagramCanvasView's edge-hit-testing TODO).
+/// Node and edge selection are mutually exclusive (see
+/// `DiagramCanvasView.edgeSelection`'s doc comment), so this never has to
+/// render both a node form and the Connector section at once.
 struct InspectorView: View {
     @ObservedObject var document: DiagramDocument
     @ObservedObject var selection: SelectionModel
@@ -27,12 +28,20 @@ struct InspectorView: View {
         }
     }
 
+    private var selectedEdges: [DiagramEdge] {
+        document.model.pages.values.flatMap { page in
+            selection.selectedEdgeIDs.compactMap { page.edges[$0] }
+        }
+    }
+
     var body: some View {
         Group {
             if selectedNodes.count == 1 {
                 singleSelectionForm(selectedNodes[0])
             } else if selectedNodes.count > 1 {
                 multiSelectionForm(selectedNodes)
+            } else if !selectedEdges.isEmpty {
+                connectorForm
             } else {
                 emptyState
             }
@@ -96,6 +105,98 @@ struct InspectorView: View {
         }
         .padding(.horizontal, 16)
         .padding(.top, 16)
+    }
+
+    // MARK: - Connector (edge selection)
+
+    private var connectorForm: some View {
+        Form {
+            Section {
+                Text(selectedEdges.count == 1 ? "1 connector selected" : "\(selectedEdges.count) connectors selected")
+                    .foregroundStyle(.secondary)
+            }
+            Section("Routing") {
+                Picker("Line", selection: routingBinding) {
+                    ForEach(RoutingStyle.allCases, id: \.self) { style in
+                        Text(style.displayName).tag(style)
+                    }
+                }
+                Picker("Style", selection: dashBinding) {
+                    Text("Solid").tag(LineDashStyle.solid)
+                    Text("Dashed").tag(LineDashStyle.dashed)
+                    Text("Dotted").tag(LineDashStyle.dotted)
+                }
+                TextField("Width", value: strokeWidthBinding, format: .number)
+            }
+            Section("Arrows") {
+                Picker("Start", selection: arrowBinding(\.startArrow)) {
+                    ForEach(arrowCases, id: \.self) { style in
+                        Text(style.rawValue.capitalized).tag(style)
+                    }
+                }
+                Picker("End", selection: arrowBinding(\.endArrow)) {
+                    ForEach(arrowCases, id: \.self) { style in
+                        Text(style.rawValue.capitalized).tag(style)
+                    }
+                }
+            }
+            Section("Appearance") {
+                ColorPicker("Color", selection: edgeColorBinding)
+            }
+        }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
+    }
+
+    private var arrowCases: [ArrowheadStyle] { ArrowheadStyle.allCases }
+
+    private var routingBinding: Binding<RoutingStyle> {
+        Binding(
+            get: { selectedEdges.first?.routing ?? .straight },
+            set: { newValue in
+                bridge.canvasView?.updateSelectedEdges(actionName: "Set Routing") { $0.routing = newValue }
+            }
+        )
+    }
+
+    private var dashBinding: Binding<LineDashStyle> {
+        Binding(
+            get: { selectedEdges.first?.style.dash ?? .solid },
+            set: { newValue in
+                bridge.canvasView?.updateSelectedEdges(actionName: "Set Line Style") { $0.style.dash = newValue }
+            }
+        )
+    }
+
+    private var strokeWidthBinding: Binding<Double> {
+        Binding(
+            get: { selectedEdges.first?.style.strokeWidth ?? 1 },
+            set: { newValue in
+                bridge.canvasView?.updateSelectedEdges(actionName: "Set Line Width") { $0.style.strokeWidth = newValue }
+            }
+        )
+    }
+
+    private func arrowBinding(_ keyPath: WritableKeyPath<LineStyle, ArrowheadStyle>) -> Binding<ArrowheadStyle> {
+        Binding(
+            get: { selectedEdges.first?.style[keyPath: keyPath] ?? .none },
+            set: { newValue in
+                bridge.canvasView?.updateSelectedEdges(actionName: "Set Arrow") { $0.style[keyPath: keyPath] = newValue }
+            }
+        )
+    }
+
+    private var edgeColorBinding: Binding<Color> {
+        Binding(
+            get: {
+                guard let ref = selectedEdges.first?.style.strokeColor else { return Color(nsColor: .systemGray) }
+                return Color(nsColor: NSColor(ref))
+            },
+            set: { newColor in
+                let ref = ColorRef(nsColor: NSColor(newColor))
+                bridge.canvasView?.updateSelectedEdges(actionName: "Set Color") { $0.style.strokeColor = ref }
+            }
+        )
     }
 
     // MARK: - Shared sections (apply to every selected node)

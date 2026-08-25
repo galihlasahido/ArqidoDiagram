@@ -62,11 +62,11 @@ public struct ShapeStyle: Codable, Hashable, Sendable {
     }
 }
 
-public enum ArrowheadStyle: String, Codable, Sendable {
+public enum ArrowheadStyle: String, Codable, Sendable, CaseIterable {
     case none, open, filled, diamond, circle
 }
 
-public enum LineDashStyle: String, Codable, Sendable {
+public enum LineDashStyle: String, Codable, Sendable, CaseIterable {
     case solid, dashed, dotted
 }
 

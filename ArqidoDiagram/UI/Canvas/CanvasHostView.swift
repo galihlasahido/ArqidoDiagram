@@ -15,6 +15,7 @@ struct CanvasHostView: NSViewRepresentable {
     @ObservedObject var shapeInsertion: ShapeInsertionRequest
     @ObservedObject var inspectorBridge: InspectorBridge
     @ObservedObject var componentStore: CustomComponentStore
+    @ObservedObject var connectorStyle: ConnectorStyleModel
     @Binding var activePageID: PageID?
 
     private var resolvedPageID: PageID? { activePageID ?? document.model.pageOrder.first }
@@ -27,6 +28,9 @@ struct CanvasHostView: NSViewRepresentable {
         }
         view.onSelectionChange = { ids in
             selection.selectedNodeIDs = ids
+        }
+        view.onEdgeSelectionChange = { ids in
+            selection.selectedEdgeIDs = ids
         }
         view.onSceneChanged = { [weak view] in
             guard let view else { return }
@@ -58,6 +62,8 @@ struct CanvasHostView: NSViewRepresentable {
         // matters once something else (Inspector, search) starts writing
         // into `selection` — `applyExternalSelection` no-ops otherwise.
         nsView.applyExternalSelection(selection.selectedNodeIDs)
+        nsView.applyExternalEdgeSelection(selection.selectedEdgeIDs)
+        nsView.defaultRoutingStyle = connectorStyle.routingStyle
 
         if let pending = shapeInsertion.pending {
             nsView.addNode(ofType: pending.shapeType, iconType: pending.iconType, text: pending.text)
