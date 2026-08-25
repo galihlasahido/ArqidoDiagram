@@ -450,8 +450,22 @@ public final class DiagramCanvasView: NSView {
         switch event.keyCode {
         case 51, 117: // Backspace, Forward Delete
             delete(nil)
+        case 49: // Space — hold to pan, per the spec's minimum shortcut list
+            if !isSpaceDown {
+                isSpaceDown = true
+                NSCursor.openHand.set()
+            }
         default:
             super.keyDown(with: event)
+        }
+    }
+
+    public override func keyUp(with event: NSEvent) {
+        if event.keyCode == 49 {
+            isSpaceDown = false
+            NSCursor.arrow.set()
+        } else {
+            super.keyUp(with: event)
         }
     }
 
@@ -560,9 +574,11 @@ public final class DiagramCanvasView: NSView {
         case resize(handle: ResizeHandle, startBounds: CGRect, startFrames: [NodeID: CGRect])
         case rotate(nodeID: NodeID, center: CGPoint, startAngle: CGFloat, startRotation: Double)
         case connector(sourceNodeID: NodeID, currentContentPoint: CGPoint)
+        case pan(startViewPoint: CGPoint, startOrigin: CGPoint)
     }
 
     private var dragMode: DragMode = .none
+    private var isSpaceDown = false
     private var marqueeStartView: CGPoint?
     private var marqueeCurrentView: CGPoint?
 
@@ -650,6 +666,12 @@ public final class DiagramCanvasView: NSView {
         let contentPoint = viewport.viewToContent(point: viewPoint)
         let isExtending = event.modifierFlags.contains(.shift) || event.modifierFlags.contains(.command)
 
+        if isSpaceDown {
+            NSCursor.closedHand.set()
+            dragMode = .pan(startViewPoint: viewPoint, startOrigin: viewport.contentOrigin)
+            return
+        }
+
         if event.clickCount >= 2, let hitID = topmostNode(at: contentPoint) {
             beginTextEditing(hitID)
             return
@@ -735,6 +757,10 @@ public final class DiagramCanvasView: NSView {
         case .connector(let sourceID, _):
             dragMode = .connector(sourceNodeID: sourceID, currentContentPoint: contentPoint)
             needsDisplay = true
+        case .pan(let startViewPoint, let startOrigin):
+            let dx = (viewPoint.x - startViewPoint.x) / viewport.scale
+            let dy = (viewPoint.y - startViewPoint.y) / viewport.scale
+            viewport.contentOrigin = CGPoint(x: startOrigin.x - dx, y: startOrigin.y - dy)
         }
     }
 
@@ -827,6 +853,9 @@ public final class DiagramCanvasView: NSView {
             }
             let edge = DiagramEdge(source: .node(sourceID, portID: nil), target: target)
             perform(AddEdgesCommand(edges: [edge]), actionName: "Connect")
+
+        case .pan:
+            NSCursor.openHand.set()
         }
     }
 

@@ -54,6 +54,21 @@ private final class Harness {
         view.mouseDragged(with: event(.leftMouseDragged, at: end, modifiers: modifiers))
         view.mouseUp(with: event(.leftMouseUp, at: end, modifiers: modifiers))
     }
+
+    func keyEvent(_ type: NSEvent.EventType, keyCode: UInt16) -> NSEvent {
+        NSEvent.keyEvent(
+            with: type,
+            location: .zero,
+            modifierFlags: [],
+            timestamp: 0,
+            windowNumber: window.windowNumber,
+            context: nil,
+            characters: "",
+            charactersIgnoringModifiers: "",
+            isARepeat: false,
+            keyCode: keyCode
+        )!
+    }
 }
 
 final class DiagramCanvasViewInteractionTests: XCTestCase {
@@ -623,5 +638,38 @@ final class DiagramCanvasViewInteractionTests: XCTestCase {
         snapshot = h.view.currentPageSnapshot(name: "T", order: 0, canvasSize: nil, background: PageBackground())
         XCTAssertEqual(snapshot.nodes[node.id]?.isLocked, false)
         XCTAssertEqual(snapshot.nodes[node.id]?.isHidden, false)
+    }
+
+    // MARK: - Space-to-pan
+
+    func testHoldingSpaceAndDraggingPansTheViewportInsteadOfMovingNodes() {
+        let h = Harness()
+        let node = makeNode(x: 100, y: 100, w: 100, h: 60)
+        h.view.loadPage(page(with: [node]))
+        h.view.applyExternalSelection([node.id])
+
+        h.view.keyDown(with: h.keyEvent(.keyDown, keyCode: 49)) // Space
+        h.drag(from: CGPoint(x: 500, y: 500), to: CGPoint(x: 600, y: 550))
+        h.view.keyUp(with: h.keyEvent(.keyUp, keyCode: 49))
+
+        // The node itself never moved — the viewport panned instead.
+        let snapshot = h.view.currentPageSnapshot(name: "T", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.nodes[node.id]?.position, Point2D(x: 100, y: 100))
+        // contentOrigin moved opposite the drag direction (dragging right
+        // reveals content to the left, i.e. origin decreases).
+        XCTAssertEqual(h.view.viewport.contentOrigin, CGPoint(x: -100, y: -50))
+    }
+
+    func testReleasingSpaceReturnsToNormalSelectionDragging() {
+        let h = Harness()
+        let node = makeNode(x: 100, y: 100, w: 100, h: 60)
+        h.view.loadPage(page(with: [node]))
+
+        h.view.keyDown(with: h.keyEvent(.keyDown, keyCode: 49))
+        h.view.keyUp(with: h.keyEvent(.keyUp, keyCode: 49))
+
+        h.drag(from: CGPoint(x: 150, y: 130), to: CGPoint(x: 250, y: 230))
+        let snapshot = h.view.currentPageSnapshot(name: "T", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.nodes[node.id]?.position, Point2D(x: 200, y: 200), "should move the node normally once space is released")
     }
 }
