@@ -37,6 +37,12 @@ struct InspectorView: View {
                 emptyState
             }
         }
+        // Without an explicit top alignment here, the `NavigationSplitView`
+        // detail column centers whatever it's given vertically whenever the
+        // Form's content is shorter than the column — this is what was
+        // producing the large empty gap above "Position" (and a matching
+        // one below "Tags") instead of the form simply starting at the top.
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .top)
         .navigationTitle("Inspector")
     }
 
@@ -73,6 +79,8 @@ struct InspectorView: View {
             typographySection
             metadataSection
         }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
     }
 
     // MARK: - Multi-selection
@@ -86,6 +94,8 @@ struct InspectorView: View {
             appearanceSection
             metadataSection
         }
+        .padding(.horizontal, 16)
+        .padding(.top, 16)
     }
 
     // MARK: - Shared sections (apply to every selected node)
