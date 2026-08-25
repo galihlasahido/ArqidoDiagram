@@ -17,7 +17,13 @@ let package = Package(
         .library(name: "DiagramLayout", targets: ["DiagramLayout"]),
         .library(name: "DiagramValidation", targets: ["DiagramValidation"]),
         .library(name: "DiagramAI", targets: ["DiagramAI"]),
-        .library(name: "DiagramInterop", targets: ["DiagramInterop"])
+        .library(name: "DiagramInterop", targets: ["DiagramInterop"]),
+        .executable(name: "diagramctl", targets: ["diagramctl"])
+    ],
+    dependencies: [
+        // §34 "CLI" (diagramctl): Apple's own argument-parsing package —
+        // the standard choice for a Swift CLI tool, used by swift itself.
+        .package(url: "https://github.com/apple/swift-argument-parser", from: "1.3.0")
     ],
     targets: [
         // Protocol-only seams for later phases (Layout, Validation, Import, AI)
@@ -85,6 +91,21 @@ let package = Package(
         // transforms, not AI's job — reserving DiagramAI for the genuinely
         // free-form cases (natural-language prompts, arbitrary source code).
         .target(name: "DiagramInterop", dependencies: ["DiagramModel", "DiagramLayout"]),
+
+        // §34 "CLI": diagramctl generate/validate/export/diff/document,
+        // built for CI/CD usage ("Git -> CI/CD -> diagramctl validate ->
+        // Architecture Rules -> PASS/FAIL") — Phase 4's "works entirely
+        // locally" architecture platform. Pulls in DiagramExport (image
+        // formats) and DiagramInterop (text formats/Architecture-as-Code)
+        // so the CLI covers the same export surface the app does.
+        .executableTarget(
+            name: "diagramctl",
+            dependencies: [
+                "DiagramModel", "DiagramPersistence", "DiagramValidation", "DiagramLayout",
+                "DiagramExport", "DiagramInterop",
+                .product(name: "ArgumentParser", package: "swift-argument-parser")
+            ]
+        ),
 
         .testTarget(name: "DiagramModelTests", dependencies: ["DiagramModel"]),
         .testTarget(name: "DiagramPersistenceTests", dependencies: ["DiagramPersistence", "DiagramValidation"]),
