@@ -84,7 +84,7 @@ let package = Package(
         // YAML/SQL exporters. These are real, well-defined structured-data
         // transforms, not AI's job — reserving DiagramAI for the genuinely
         // free-form cases (natural-language prompts, arbitrary source code).
-        .target(name: "DiagramInterop", dependencies: ["DiagramModel"]),
+        .target(name: "DiagramInterop", dependencies: ["DiagramModel", "DiagramLayout"]),
 
         .testTarget(name: "DiagramModelTests", dependencies: ["DiagramModel"]),
         .testTarget(name: "DiagramPersistenceTests", dependencies: ["DiagramPersistence", "DiagramValidation"]),

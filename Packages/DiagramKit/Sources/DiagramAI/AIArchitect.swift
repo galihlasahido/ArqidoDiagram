@@ -41,49 +41,7 @@ public struct AIArchitect: Sendable {
     ) async throws -> (nodes: [DiagramNode], edges: [DiagramEdge]) {
         let raw = try await provider.complete(system: Self.diagramSystemPrompt, user: prompt, maxTokens: 3000)
         let spec = try Self.parseSpec(from: raw)
-        return Self.materialize(spec, layout: layout)
-    }
-
-    /// Exposed separately so the ⌘K command bar's "Convert diagram"/"Add
-    /// missing components" intents can go straight from an already-parsed
-    /// spec (e.g. one produced by `DiagramInterop`) through the same
-    /// materialize+layout step, without a redundant LLM round trip.
-    public static func materialize(
-        _ spec: GeneratedDiagramSpec,
-        layout: any LayoutEngine = HierarchicalLayoutEngine()
-    ) -> (nodes: [DiagramNode], edges: [DiagramEdge]) {
-        var idMap: [String: NodeID] = [:]
-        var page = DiagramPage(name: "", order: 0)
-
-        for (index, nodeSpec) in spec.nodes.enumerated() {
-            let node = DiagramNode(
-                type: SemanticTypeShapeMapping.shapeType(for: nodeSpec.type),
-                position: Point2D(x: 0, y: 0),
-                size: Size2D(width: 160, height: 90),
-                text: TextContent(string: nodeSpec.label),
-                metadata: Metadata(semanticType: nodeSpec.type),
-                zIndex: index
-            )
-            idMap[nodeSpec.id] = node.id
-            page.nodes[node.id] = node
-            page.nodeZOrder.append(node.id)
-        }
-
-        for edgeSpec in spec.edges {
-            guard let sourceID = idMap[edgeSpec.from], let targetID = idMap[edgeSpec.to] else { continue }
-            var edge = DiagramEdge(source: .node(sourceID, portID: nil), target: .node(targetID, portID: nil))
-            if let label = edgeSpec.label, !label.isEmpty {
-                edge.labels = [EdgeLabel(text: label)]
-            }
-            page.edges[edge.id] = edge
-            page.edgeZOrder.append(edge.id)
-        }
-
-        let laidOut = layout.layout(page)
-        let orderedNodeIDs = spec.nodes.compactMap { idMap[$0.id] }
-        let nodes = orderedNodeIDs.compactMap { laidOut.nodes[$0] }
-        let edges = laidOut.edgeZOrder.compactMap { laidOut.edges[$0] }
-        return (nodes, edges)
+        return DiagramSpecMaterializer.materialize(spec, layout: layout)
     }
 
     static func parseSpec(from raw: String) throws -> GeneratedDiagramSpec {

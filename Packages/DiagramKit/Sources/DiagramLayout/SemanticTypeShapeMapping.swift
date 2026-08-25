@@ -32,7 +32,10 @@ public enum SemanticTypeShapeMapping {
         if lowered.contains("microservice") || lowered.contains("service") { return .c4Container }
         if lowered.contains("system") { return .c4SoftwareSystem }
         if lowered.contains("component") { return .c4Component }
-        if lowered.contains("entity") { return .erdEntity }
+        if lowered.contains("primary key") { return .erdPrimaryKey }
+        if lowered.contains("foreign key") { return .erdForeignKey }
+        if lowered.contains("attribute") || lowered.contains("column") || lowered.contains("field") { return .erdAttribute }
+        if lowered.contains("entity") || lowered.contains("table") { return .erdEntity }
         if lowered.contains("event") { return .bpmnIntermediateEvent }
         if lowered.contains("task") || lowered.contains("process") { return .bpmnTask }
         if lowered.contains("decision") || lowered.contains("gateway condition") { return .flowchartDecision }

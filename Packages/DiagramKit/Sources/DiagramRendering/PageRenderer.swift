@@ -35,8 +35,17 @@ public enum PageRenderer {
         guard !node.isHidden else { return }
         let path = ShapeGeometry.path(for: node.type, in: node.frame)
 
-        let fillColor = NSColor(node.style.fill ?? .system(.systemBlue))
-        let strokeColor = NSColor(node.style.strokeColor ?? .system(.systemGray))
+        // Unstyled nodes (the common case — most shapes are never touched
+        // in the Inspector's Appearance section) default to a light,
+        // neutral fill with the user's own macOS accent color as the
+        // border, not a hardcoded saturated block — the same "outlined
+        // card" language Apple's own apps use, and it reads as native
+        // regardless of which of the twelve system accent colors the user
+        // has chosen in System Settings. Re-resolved on every draw (never
+        // baked into `node.style`), so it still tracks light/dark and a
+        // changed accent color live.
+        let fillColor = node.style.fill.map(NSColor.init) ?? .controlBackgroundColor
+        let strokeColor = node.style.strokeColor.map(NSColor.init) ?? .controlAccentColor
 
         context.saveGState()
         if node.rotation != 0 {
