@@ -129,6 +129,10 @@ struct AppCommands: Commands {
             }
             .keyboardShortcut("g", modifiers: [.command, .shift])
 
+            Button("Save Selection as Component…") {
+                NSApp.sendAction(Selector(("saveSelectionAsComponent:")), to: nil, from: nil)
+            }
+
             Divider()
 
             Button("Lock") { NSApp.sendAction(Selector(("toggleLock:")), to: nil, from: nil) }

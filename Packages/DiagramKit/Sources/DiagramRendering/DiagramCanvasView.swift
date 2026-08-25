@@ -195,6 +195,12 @@ public final class DiagramCanvasView: NSView {
     public var onExportRequested: ((DiagramPage, ExportFormat) -> Void)?
     public var onCopyAsSVGRequested: ((DiagramPage) -> Void)?
 
+    /// Fired after `saveSelectionAsComponent` captures a component and the
+    /// user confirms the name/category prompt — the app target persists it
+    /// via `CustomComponentLibrary` (file I/O has no place in this AppKit-
+    /// only, Foundation-testable module).
+    public var onComponentSaved: ((CustomComponent) -> Void)?
+
     private func exportSnapshot() -> DiagramPage {
         scene.snapshot(name: "Export", order: 0, canvasSize: nil, background: PageBackground())
     }
@@ -262,6 +268,18 @@ public final class DiagramCanvasView: NSView {
         return node.id
     }
 
+    /// Programmatic edge creation — the interactive draw-connector tool
+    /// builds its own `DiagramEdge` inline (see `endDrag`'s `.connector`
+    /// case) since it needs live target resolution mid-drag, but callers
+    /// that already know both endpoints (component insertion, future auto
+    /// layout) go through this instead of duplicating the command dance.
+    @discardableResult
+    public func addEdge(from source: EndpointRef, to target: EndpointRef, routing: RoutingStyle = .straight) -> EdgeID {
+        let edge = DiagramEdge(source: source, target: target, routing: routing)
+        perform(AddEdgesCommand(edges: [edge]), actionName: "Connect")
+        return edge.id
+    }
+
     // MARK: - Delete / duplicate / copy / paste / z-order / select all
 
     @objc public func delete(_ sender: Any?) {
@@ -300,6 +318,101 @@ public final class DiagramCanvasView: NSView {
         }
         perform(AddNodesCommand(nodes: copies), actionName: "Duplicate")
         updateSelectionFromInteraction(Set(copies.map(\.id)))
+    }
+
+    // MARK: - Custom components
+
+    /// Prompts for a name/category via a plain `NSAlert` (matching the
+    /// no-custom-design-system Visual/UI Style rule — a native alert, not a
+    /// bespoke SwiftUI sheet) then hands the captured component to
+    /// `onComponentSaved` for the app target to persist.
+    @objc public func saveSelectionAsComponent(_ sender: Any?) {
+        guard !selection.isEmpty else { return }
+
+        let alert = NSAlert()
+        alert.messageText = "Save Selection as Component"
+        alert.informativeText = "Name and categorize this component so it can be found and reused later."
+        alert.addButton(withTitle: "Save")
+        alert.addButton(withTitle: "Cancel")
+
+        let nameField = NSTextField(string: "Component")
+        nameField.frame = NSRect(x: 0, y: 28, width: 260, height: 24)
+        let categoryField = NSTextField(string: "General")
+        categoryField.frame = NSRect(x: 0, y: 0, width: 260, height: 24)
+        let accessory = NSView(frame: NSRect(x: 0, y: 0, width: 260, height: 52))
+        accessory.addSubview(nameField)
+        accessory.addSubview(categoryField)
+        alert.accessoryView = accessory
+        alert.window.initialFirstResponder = nameField
+
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        let name = nameField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        let category = categoryField.stringValue.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard let component = captureSelectionAsComponent(
+            name: name.isEmpty ? "Component" : name,
+            category: category.isEmpty ? "General" : category
+        ) else { return }
+        onComponentSaved?(component)
+    }
+
+    /// Positions are made relative to the selection's own bounding-box
+    /// origin so the component can be dropped anywhere on reuse; only
+    /// edges with both endpoints inside the selection are kept (see
+    /// `CustomComponent`'s doc comment on why).
+    func captureSelectionAsComponent(name: String, category: String) -> CustomComponent? {
+        let nodes = selection.compactMap { scene.nodes[$0] }
+        guard !nodes.isEmpty else { return nil }
+        let originX = nodes.map(\.position.x).min() ?? 0
+        let originY = nodes.map(\.position.y).min() ?? 0
+        let relativeNodes = nodes.map { node -> DiagramNode in
+            var copy = node
+            copy.position = Point2D(x: node.position.x - originX, y: node.position.y - originY)
+            copy.groupID = nil
+            return copy
+        }
+        let nodeIDs = Set(nodes.map(\.id))
+        let internalEdges = scene.edges.values.filter { edge in
+            guard case .node(let sourceID, _) = edge.source, case .node(let targetID, _) = edge.target else { return false }
+            return nodeIDs.contains(sourceID) && nodeIDs.contains(targetID)
+        }
+        return CustomComponent(name: name, category: category, nodes: relativeNodes, edges: Array(internalEdges))
+    }
+
+    /// The reuse half of custom components: clones every node/edge with
+    /// fresh IDs (so inserting the same component twice never collides)
+    /// and remaps edge endpoints through the resulting ID map, then adds
+    /// everything as one undo step.
+    public func insertComponent(_ component: CustomComponent, at contentPoint: CGPoint? = nil) {
+        guard !component.nodes.isEmpty else { return }
+        let center = contentPoint ?? viewport.viewToContent(point: CGPoint(x: bounds.midX, y: bounds.midY))
+        let size = component.boundingSize
+        let offsetX = center.x - size.width / 2
+        let offsetY = center.y - size.height / 2
+        let maxZ = (scene.nodes.values.map(\.zIndex).max() ?? -1)
+
+        var idMap: [NodeID: NodeID] = [:]
+        let newNodes = component.nodes.enumerated().map { index, node -> DiagramNode in
+            var copy = node
+            let newID = NodeID()
+            idMap[node.id] = newID
+            copy.id = newID
+            copy.position = Point2D(x: node.position.x + offsetX, y: node.position.y + offsetY)
+            copy.zIndex = maxZ + 1 + index
+            return copy
+        }
+        let newEdges = component.edges.compactMap { edge -> DiagramEdge? in
+            guard case .node(let sourceID, let sourcePort) = edge.source,
+                  case .node(let targetID, let targetPort) = edge.target,
+                  let newSource = idMap[sourceID], let newTarget = idMap[targetID] else { return nil }
+            var copy = edge
+            copy.id = EdgeID()
+            copy.source = .node(newSource, portID: sourcePort)
+            copy.target = .node(newTarget, portID: targetPort)
+            return copy
+        }
+
+        perform(CompositeCommand([AddNodesCommand(nodes: newNodes), AddEdgesCommand(edges: newEdges)]), actionName: "Insert Component")
+        updateSelectionFromInteraction(Set(newNodes.map(\.id)))
     }
 
     private static let pasteboardType = NSPasteboard.PasteboardType("com.arqido.diagram.nodes")

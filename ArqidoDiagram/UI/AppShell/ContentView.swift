@@ -8,11 +8,12 @@ struct ContentView: View {
     @StateObject private var shapeInsertion = ShapeInsertionRequest()
     @StateObject private var inspectorBridge = InspectorBridge()
     @StateObject private var searchModel = SearchModel()
+    @StateObject private var componentStore = CustomComponentStore()
     @State private var activePageID: PageID?
 
     var body: some View {
         NavigationSplitView {
-            LibrarySidebarView(shapeInsertion: shapeInsertion)
+            LibrarySidebarView(shapeInsertion: shapeInsertion, componentStore: componentStore)
                 .navigationSplitViewColumnWidth(min: 180, ideal: 220, max: 300)
         } content: {
             // Explicitly given no ideal width so it absorbs whatever the
@@ -24,6 +25,7 @@ struct ContentView: View {
                 selection: selection,
                 shapeInsertion: shapeInsertion,
                 inspectorBridge: inspectorBridge,
+                componentStore: componentStore,
                 activePageID: $activePageID
             )
             .navigationSplitViewColumnWidth(min: 400, ideal: 900)

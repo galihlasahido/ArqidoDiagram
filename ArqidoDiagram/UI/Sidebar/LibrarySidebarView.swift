@@ -11,6 +11,7 @@ import DiagramModel
 /// across launches) — a deliberate scope cut, not an oversight.
 struct LibrarySidebarView: View {
     @ObservedObject var shapeInsertion: ShapeInsertionRequest
+    @ObservedObject var componentStore: CustomComponentStore
 
     @State private var searchText = ""
     @State private var favorites: Set<ShapeType> = []
@@ -32,6 +33,20 @@ struct LibrarySidebarView: View {
         }
     }
 
+    private var componentSearchResults: [CustomComponent]? {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return nil }
+        let lowered = query.lowercased()
+        return componentStore.components.filter {
+            $0.name.lowercased().contains(lowered) || $0.category.lowercased().contains(lowered)
+        }
+    }
+
+    private var componentsByCategory: [(category: String, components: [CustomComponent])] {
+        let grouped = Dictionary(grouping: componentStore.components, by: \.category)
+        return grouped.keys.sorted().map { (category: $0, components: grouped[$0] ?? []) }
+    }
+
     var body: some View {
         List {
             HStack {
@@ -40,10 +55,11 @@ struct LibrarySidebarView: View {
                     .textFieldStyle(.plain)
             }
 
-            if searchResults != nil || iconSearchResults != nil {
+            if searchResults != nil || iconSearchResults != nil || componentSearchResults != nil {
                 Section("Results") {
                     ForEach(searchResults ?? []) { entry in shapeRow(entry) }
                     ForEach(iconSearchResults ?? []) { entry in iconRow(entry) }
+                    ForEach(componentSearchResults ?? []) { component in componentRow(component) }
                 }
             } else {
                 if !favorites.isEmpty {
@@ -54,6 +70,13 @@ struct LibrarySidebarView: View {
                 if !recentlyUsed.isEmpty {
                     Section("Recently Used") {
                         ForEach(recentEntries) { entry in shapeRow(entry) }
+                    }
+                }
+                if !componentStore.components.isEmpty {
+                    ForEach(componentsByCategory, id: \.category) { group in
+                        Section("My Components — \(group.category)") {
+                            ForEach(group.components) { component in componentRow(component) }
+                        }
                     }
                 }
                 ForEach(ShapeCategory.allCases, id: \.self) { category in
@@ -123,5 +146,28 @@ struct LibrarySidebarView: View {
         }
         .buttonStyle(.plain)
         .help("Add \(entry.pack.rawValue) \(entry.name) to the canvas")
+    }
+
+    private func componentRow(_ component: CustomComponent) -> some View {
+        HStack {
+            Button {
+                shapeInsertion.pendingComponent = component
+            } label: {
+                Label(component.name, systemImage: "square.on.square")
+            }
+            .buttonStyle(.plain)
+            .help("Add \(component.name) to the canvas")
+
+            Spacer()
+
+            Button {
+                componentStore.delete(id: component.id)
+            } label: {
+                Image(systemName: "trash")
+                    .foregroundStyle(.secondary)
+            }
+            .buttonStyle(.plain)
+            .help("Delete \(component.name) from My Components")
+        }
     }
 }

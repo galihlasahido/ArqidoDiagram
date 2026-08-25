@@ -14,6 +14,7 @@ struct CanvasHostView: NSViewRepresentable {
     @ObservedObject var selection: SelectionModel
     @ObservedObject var shapeInsertion: ShapeInsertionRequest
     @ObservedObject var inspectorBridge: InspectorBridge
+    @ObservedObject var componentStore: CustomComponentStore
     @Binding var activePageID: PageID?
 
     private var resolvedPageID: PageID? { activePageID ?? document.model.pageOrder.first }
@@ -37,6 +38,9 @@ struct CanvasHostView: NSViewRepresentable {
         view.onCopyAsSVGRequested = { page in
             ExportCoordinator.copyAsSVG(page: page)
         }
+        view.onComponentSaved = { component in
+            componentStore.save(component)
+        }
         inspectorBridge.canvasView = view
         loadCurrentPage(into: view, coordinator: context.coordinator)
         return view
@@ -52,6 +56,10 @@ struct CanvasHostView: NSViewRepresentable {
         if let pending = shapeInsertion.pending {
             nsView.addNode(ofType: pending.shapeType, iconType: pending.iconType, text: pending.text)
             shapeInsertion.pending = nil
+        }
+        if let component = shapeInsertion.pendingComponent {
+            nsView.insertComponent(component)
+            shapeInsertion.pendingComponent = nil
         }
     }
 
