@@ -13,6 +13,7 @@
 		226500684F8D33309AB360A9 /* DiagramDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 664420670A4167E8F7B57114 /* DiagramDocument.swift */; };
 		22CC877A4DA7FBF7032917AF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC26882DD8172FD1012F325 /* ContentView.swift */; };
 		313C3528020CF88B9388AD55 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD41EC125B8CA9E44C02822 /* InspectorView.swift */; };
+		4070B241E7F75DFE01419BFC /* ExportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE97C4A706BBEE597FC5D32 /* ExportCoordinator.swift */; };
 		6953EBE493AEA65F0DD8785A /* ShapeInsertionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325E12829E933C04377339CB /* ShapeInsertionRequest.swift */; };
 		8A5AE0E29173FCD425AC5DB3 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */; };
 		A62E6C07DD68BBC90F4BE9F7 /* DiagramInteraction in Frameworks */ = {isa = PBXBuildFile; productRef = F7D637675F00F7E7335EAA60 /* DiagramInteraction */; };
@@ -44,6 +45,7 @@
 		7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionModel.swift; sourceTree = "<group>"; };
 		944039CEA4BF2D86958B0CF8 /* DiagramDocumentWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocumentWindowController.swift; sourceTree = "<group>"; };
 		AC0AC164C4B632D1A80B8B69 /* DiagramKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DiagramKit; path = Packages/DiagramKit; sourceTree = SOURCE_ROOT; };
+		AFE97C4A706BBEE597FC5D32 /* ExportCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCoordinator.swift; sourceTree = "<group>"; };
 		B039D17C71B630291DB01003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		C8938FD75E8AD92E2B7A36E4 /* ArqidoDiagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ArqidoDiagram.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBC26882DD8172FD1012F325 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
@@ -124,6 +126,7 @@
 			children = (
 				4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */,
 				3BFE5827FB1F7DB29704E326 /* CanvasStatusModel.swift */,
+				AFE97C4A706BBEE597FC5D32 /* ExportCoordinator.swift */,
 				E4E4C08CC768980DD2BA2916 /* InspectorBridge.swift */,
 				7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */,
 				325E12829E933C04377339CB /* ShapeInsertionRequest.swift */,
@@ -260,6 +263,7 @@
 				22CC877A4DA7FBF7032917AF /* ContentView.swift in Sources */,
 				226500684F8D33309AB360A9 /* DiagramDocument.swift in Sources */,
 				C2CC9AC89FE2DD85ED536CB9 /* DiagramDocumentWindowController.swift in Sources */,
+				4070B241E7F75DFE01419BFC /* ExportCoordinator.swift in Sources */,
 				ED9D539A30E56AE5FB990D41 /* InspectorBridge.swift in Sources */,
 				313C3528020CF88B9388AD55 /* InspectorView.swift in Sources */,
 				8A5AE0E29173FCD425AC5DB3 /* LibrarySidebarView.swift in Sources */,

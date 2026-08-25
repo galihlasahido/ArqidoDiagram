@@ -38,6 +38,14 @@ struct AppCommands: Commands {
             .keyboardShortcut("s", modifiers: [.command, .shift])
         }
 
+        CommandGroup(after: .saveItem) {
+            Menu("Export") {
+                Button("PNG…") { NSApp.sendAction(Selector(("exportPNG:")), to: nil, from: nil) }
+                Button("PDF…") { NSApp.sendAction(Selector(("exportPDF:")), to: nil, from: nil) }
+                Button("SVG…") { NSApp.sendAction(Selector(("exportSVG:")), to: nil, from: nil) }
+            }
+        }
+
         CommandGroup(replacing: .undoRedo) {
             Button("Undo") {
                 NSApp.sendAction(Selector(("undo:")), to: nil, from: nil)
@@ -65,6 +73,11 @@ struct AppCommands: Commands {
                 NSApp.sendAction(#selector(NSText.paste(_:)), to: nil, from: nil)
             }
             .keyboardShortcut("v", modifiers: .command)
+
+            Button("Copy as SVG") {
+                NSApp.sendAction(Selector(("copyAsSVG:")), to: nil, from: nil)
+            }
+            .keyboardShortcut("c", modifiers: [.command, .option])
 
             Divider()
 

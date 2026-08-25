@@ -31,6 +31,12 @@ struct CanvasHostView: NSViewRepresentable {
             guard let view else { return }
             writeBack(from: view)
         }
+        view.onExportRequested = { [weak view] page, format in
+            ExportCoordinator.presentSavePanelAndExport(page: page, format: format, window: view?.window)
+        }
+        view.onCopyAsSVGRequested = { page in
+            ExportCoordinator.copyAsSVG(page: page)
+        }
         inspectorBridge.canvasView = view
         loadCurrentPage(into: view, coordinator: context.coordinator)
         return view

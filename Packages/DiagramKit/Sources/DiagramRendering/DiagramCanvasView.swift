@@ -172,6 +172,28 @@ public final class DiagramCanvasView: NSView {
         scene.snapshot(name: name, order: order, canvasSize: canvasSize, background: background)
     }
 
+    // MARK: - Export
+    //
+    // DiagramRendering can't depend on DiagramExport (that would invert the
+    // existing DiagramExport -> DiagramRendering dependency into a cycle),
+    // so the actual PNG/PDF/SVG generation and NSSavePanel live in the app
+    // target — this just hands over a page snapshot via closures, the same
+    // pattern as onSceneChanged/onSelectionChange.
+
+    public enum ExportFormat { case png, pdf, svg }
+
+    public var onExportRequested: ((DiagramPage, ExportFormat) -> Void)?
+    public var onCopyAsSVGRequested: ((DiagramPage) -> Void)?
+
+    private func exportSnapshot() -> DiagramPage {
+        scene.snapshot(name: "Export", order: 0, canvasSize: nil, background: PageBackground())
+    }
+
+    @objc public func exportPNG(_ sender: Any?) { onExportRequested?(exportSnapshot(), .png) }
+    @objc public func exportPDF(_ sender: Any?) { onExportRequested?(exportSnapshot(), .pdf) }
+    @objc public func exportSVG(_ sender: Any?) { onExportRequested?(exportSnapshot(), .svg) }
+    @objc public func copyAsSVG(_ sender: Any?) { onCopyAsSVGRequested?(exportSnapshot()) }
+
     /// The Inspector's write path: applies `transform` to every currently
     /// selected node and commits one `UpdateNodesCommand`. Fields that only
     /// make sense for a single node (position/size/rotation) are the
@@ -519,27 +541,6 @@ public final class DiagramCanvasView: NSView {
         window?.makeFirstResponder(self)
     }
 
-    private func drawText(_ node: DiagramNode, in context: CGContext) {
-        guard let text = node.text, !text.string.isEmpty, node.id != editingNodeID else { return }
-
-        let previous = NSGraphicsContext.current
-        NSGraphicsContext.current = NSGraphicsContext(cgContext: context, flipped: isFlipped)
-        defer { NSGraphicsContext.current = previous }
-
-        let paragraph = NSMutableParagraphStyle()
-        paragraph.alignment = .center
-        let attributed = NSAttributedString(string: text.string, attributes: [
-            .font: NSFont.systemFont(ofSize: CGFloat(node.style.font?.size ?? 13)),
-            .foregroundColor: NSColor.labelColor,
-            .paragraphStyle: paragraph
-        ])
-
-        let insetRect = node.frame.insetBy(dx: 6, dy: 6)
-        let fitted = attributed.boundingRect(with: insetRect.size, options: [.usesLineFragmentOrigin])
-        let drawRect = CGRect(x: insetRect.minX, y: insetRect.midY - fitted.height / 2, width: insetRect.width, height: fitted.height)
-        attributed.draw(with: drawRect, options: [.usesLineFragmentOrigin])
-    }
-
     // MARK: - Mouse / gestures
 
     private enum DragMode {
@@ -843,15 +844,17 @@ public final class DiagramCanvasView: NSView {
         // Edges draw behind nodes — endpoints are clipped to the node
         // boundary (EdgeGeometry.clippedPoint), so drawing nodes on top
         // covers any line stub that would otherwise poke past the edge.
+        // PageRenderer is the single shared implementation DiagramExport
+        // also uses, so exported output matches this exactly.
         for edge in scene.edges.values.sorted(by: { $0.zIndex < $1.zIndex }) {
-            drawEdge(edge, in: context)
+            PageRenderer.drawEdge(edge, nodes: scene.nodes, in: context, scale: viewport.scale)
         }
 
         let contentDirtyRect = viewport.viewToContent(rect: dirtyRect)
         let candidateIDs = spatialIndex.query(contentDirtyRect)
         let visibleNodes = candidateIDs.compactMap { scene.nodes[$0] }.sorted { $0.zIndex < $1.zIndex }
         for node in visibleNodes {
-            draw(node, in: context)
+            PageRenderer.drawNode(node, in: context, scale: viewport.scale, skipText: node.id == editingNodeID)
         }
 
         if let connectorPreview = pendingConnectorPreview() {
@@ -879,72 +882,6 @@ public final class DiagramCanvasView: NSView {
         if let marqueeRect = marqueeViewRect {
             drawMarquee(marqueeRect, in: context)
         }
-    }
-
-    private func drawEdge(_ edge: DiagramEdge, in context: CGContext) {
-        guard !edge.isHidden else { return }
-        // Resolve towards the other endpoint's node center (or its own
-        // point) as the "aim" reference for boundary-clipping.
-        let targetAim = aimPoint(for: edge.target)
-        let sourceAim = aimPoint(for: edge.source)
-        guard let source = EdgeGeometry.resolvedPoint(for: edge.source, nodes: scene.nodes, towards: targetAim),
-              let target = EdgeGeometry.resolvedPoint(for: edge.target, nodes: scene.nodes, towards: sourceAim) else { return }
-
-        let path = EdgeGeometry.path(from: source, to: target, routing: edge.routing)
-        context.saveGState()
-        context.setStrokeColor(NSColor(edge.style.strokeColor ?? .system(.systemGray)).cgColor)
-        context.setLineWidth(max(edge.style.strokeWidth, 0.5) / viewport.scale)
-        if edge.style.dash == .dashed {
-            context.setLineDash(phase: 0, lengths: [6 / viewport.scale, 4 / viewport.scale])
-        } else if edge.style.dash == .dotted {
-            context.setLineDash(phase: 0, lengths: [1.5 / viewport.scale, 3 / viewport.scale])
-        }
-        context.addPath(path)
-        context.strokePath()
-
-        let arrowColor = NSColor(edge.style.strokeColor ?? .system(.systemGray)).cgColor
-        if let startArrow = EdgeGeometry.arrowheadPath(from: target, tip: source, style: edge.style.startArrow, size: 9 / viewport.scale) {
-            context.setFillColor(arrowColor)
-            context.addPath(startArrow)
-            context.drawPath(using: edge.style.startArrow == .filled || edge.style.startArrow == .diamond || edge.style.startArrow == .circle ? .fillStroke : .stroke)
-        }
-        if let endArrow = EdgeGeometry.arrowheadPath(from: source, tip: target, style: edge.style.endArrow, size: 9 / viewport.scale) {
-            context.setFillColor(arrowColor)
-            context.addPath(endArrow)
-            context.drawPath(using: edge.style.endArrow == .filled || edge.style.endArrow == .diamond || edge.style.endArrow == .circle ? .fillStroke : .stroke)
-        }
-        context.restoreGState()
-    }
-
-    private func aimPoint(for endpoint: EndpointRef) -> CGPoint {
-        switch endpoint {
-        case .point(let p): return CGPoint(x: p.x, y: p.y)
-        case .node(let id, _): return scene.nodes[id]?.frame.center ?? .zero
-        }
-    }
-
-    private func draw(_ node: DiagramNode, in context: CGContext) {
-        guard !node.isHidden else { return }
-        let path = ShapeGeometry.path(for: node.type, in: node.frame)
-
-        let fillColor = NSColor(node.style.fill ?? .system(.systemBlue))
-        let strokeColor = NSColor(node.style.strokeColor ?? .system(.systemGray))
-
-        context.saveGState()
-        if node.rotation != 0 {
-            let center = node.frame.center
-            context.translateBy(x: center.x, y: center.y)
-            context.rotate(by: CGFloat(node.rotation))
-            context.translateBy(x: -center.x, y: -center.y)
-        }
-        context.setAlpha(node.style.opacity)
-        context.addPath(path)
-        context.setFillColor(fillColor.cgColor)
-        context.setStrokeColor(strokeColor.cgColor)
-        context.setLineWidth(max(node.style.strokeWidth, 0.5) / viewport.scale)
-        context.drawPath(using: node.style.strokeWidth > 0 ? .fillStroke : .fill)
-        drawText(node, in: context) // inside the same rotation transform, so text rotates with the shape
-        context.restoreGState()
     }
 
     private func drawSelectionHighlights(in context: CGContext) {
@@ -1079,7 +1016,7 @@ public final class DiagramCanvasView: NSView {
 }
 
 extension DiagramNode {
-    var frame: CGRect {
+    public var frame: CGRect {
         CGRect(x: position.x, y: position.y, width: size.width, height: size.height)
     }
 }
