@@ -15,6 +15,7 @@
 		313C3528020CF88B9388AD55 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD41EC125B8CA9E44C02822 /* InspectorView.swift */; };
 		8A5AE0E29173FCD425AC5DB3 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */; };
 		A62E6C07DD68BBC90F4BE9F7 /* DiagramInteraction in Frameworks */ = {isa = PBXBuildFile; productRef = F7D637675F00F7E7335EAA60 /* DiagramInteraction */; };
+		A6FC6CAD90F492114CA034EB /* SelectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */; };
 		ADA29FD3842F9982F88598B3 /* CanvasStatusModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFE5827FB1F7DB29704E326 /* CanvasStatusModel.swift */; };
 		ADB8273E3D5567ED1946BAAC /* DiagramModel in Frameworks */ = {isa = PBXBuildFile; productRef = 317559AC58264CCDDC9699B6 /* DiagramModel */; };
 		AF4768870B62DF81B5C0961E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B039D17C71B630291DB01003 /* Assets.xcassets */; };
@@ -36,6 +37,7 @@
 		4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasHostView.swift; sourceTree = "<group>"; };
 		4FD41EC125B8CA9E44C02822 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		664420670A4167E8F7B57114 /* DiagramDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocument.swift; sourceTree = "<group>"; };
+		7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionModel.swift; sourceTree = "<group>"; };
 		944039CEA4BF2D86958B0CF8 /* DiagramDocumentWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocumentWindowController.swift; sourceTree = "<group>"; };
 		AC0AC164C4B632D1A80B8B69 /* DiagramKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DiagramKit; path = Packages/DiagramKit; sourceTree = SOURCE_ROOT; };
 		B039D17C71B630291DB01003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
@@ -108,6 +110,7 @@
 			children = (
 				4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */,
 				3BFE5827FB1F7DB29704E326 /* CanvasStatusModel.swift */,
+				7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */,
 			);
 			path = Canvas;
 			sourceTree = "<group>";
@@ -242,6 +245,7 @@
 				C2CC9AC89FE2DD85ED536CB9 /* DiagramDocumentWindowController.swift in Sources */,
 				313C3528020CF88B9388AD55 /* InspectorView.swift in Sources */,
 				8A5AE0E29173FCD425AC5DB3 /* LibrarySidebarView.swift in Sources */,
+				A6FC6CAD90F492114CA034EB /* SelectionModel.swift in Sources */,
 				AFE71D5A194BDCE67CD4CEC9 /* StatusBarView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;

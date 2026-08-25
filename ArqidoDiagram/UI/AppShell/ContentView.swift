@@ -3,6 +3,7 @@ import SwiftUI
 struct ContentView: View {
     @ObservedObject var document: DiagramDocument
     @StateObject private var canvasStatus = CanvasStatusModel()
+    @StateObject private var selection = SelectionModel()
 
     var body: some View {
         NavigationSplitView {
@@ -12,7 +13,7 @@ struct ContentView: View {
             // Explicitly given no ideal width so it absorbs whatever the
             // sidebar/inspector columns don't claim — the canvas, not the
             // inspector, should be the pane that expands.
-            CanvasHostView(document: document, status: canvasStatus)
+            CanvasHostView(document: document, status: canvasStatus, selection: selection)
                 .navigationSplitViewColumnWidth(min: 400, ideal: 900)
                 .navigationTitle(document.model.title)
         } detail: {
@@ -20,7 +21,7 @@ struct ContentView: View {
                 .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 360)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            StatusBarView(document: document, canvasStatus: canvasStatus)
+            StatusBarView(document: document, canvasStatus: canvasStatus, selection: selection)
         }
     }
 }
