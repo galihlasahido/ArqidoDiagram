@@ -82,7 +82,7 @@ struct AppCommands: Commands {
             Button("Show Version History") {
                 NotificationCenter.default.post(name: .toggleVersionHistory, object: nil)
             }
-            .keyboardShortcut("h", modifiers: [.command, .shift])
+            .keyboardShortcut("y", modifiers: [.command, .shift])
 
             Divider()
 
