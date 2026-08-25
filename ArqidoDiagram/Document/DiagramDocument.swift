@@ -34,6 +34,10 @@ final class DiagramDocument: NSDocument, ObservableObject {
     /// contain ADRs... ADRs should link to diagram objects."
     @Published private(set) var adrs: [ArchitectureDecisionRecord] = []
 
+    /// Spec §PRESENTATION MODE: "Frames, Full screen, Previous, Next, Zoom,
+    /// Focus". Document order is slide-show order (see `PresentationFrame`).
+    @Published private(set) var frames: [PresentationFrame] = []
+
     override init() {
         model = .blank(at: Date())
         super.init()
@@ -134,7 +138,7 @@ final class DiagramDocument: NSDocument, ObservableObject {
         // never touches the previously-saved on-disk package, and
         // NSDocument's standard package-write path (temp file + atomic
         // rename) handles on-disk atomicity on top of that.
-        return try PackageWriter.fileWrapper(for: model, password: password, versions: versions, adrs: adrs)
+        return try PackageWriter.fileWrapper(for: model, password: password, versions: versions, adrs: adrs, frames: frames)
     }
 
     /// Runs on the main thread (the default for `canConcurrentlyReadDocuments
@@ -147,6 +151,7 @@ final class DiagramDocument: NSDocument, ObservableObject {
             model = try PackageReader.documentModel(from: fileWrapper)
             versions = (try? PackageReader.versions(from: fileWrapper)) ?? []
             adrs = (try? PackageReader.adrs(from: fileWrapper)) ?? []
+            frames = (try? PackageReader.frames(from: fileWrapper)) ?? []
             return
         }
 
@@ -156,6 +161,7 @@ final class DiagramDocument: NSDocument, ObservableObject {
             password = savedPassword
             versions = (try? PackageReader.versions(from: fileWrapper, password: savedPassword)) ?? []
             adrs = (try? PackageReader.adrs(from: fileWrapper, password: savedPassword)) ?? []
+            frames = (try? PackageReader.frames(from: fileWrapper, password: savedPassword)) ?? []
             return
         }
 
@@ -168,6 +174,7 @@ final class DiagramDocument: NSDocument, ObservableObject {
                 password = entered
                 versions = (try? PackageReader.versions(from: fileWrapper, password: entered)) ?? []
                 adrs = (try? PackageReader.adrs(from: fileWrapper, password: entered)) ?? []
+                frames = (try? PackageReader.frames(from: fileWrapper, password: entered)) ?? []
                 return
             } catch PackageReadError.incorrectPassword {
                 continue
@@ -251,6 +258,65 @@ final class DiagramDocument: NSDocument, ObservableObject {
         }
         undoManager?.setActionName("Add ADR")
         adrs.append(adr)
+        updateChangeCount(.changeDone)
+    }
+
+    // MARK: - Presentation frames
+    //
+    // Spec §PRESENTATION MODE: "Frames, Full screen, Previous, Next, Zoom,
+    // Focus". Mutations go through `undoManager` directly, same as ADRs —
+    // a frame isn't part of any one page's live scene, it's a saved
+    // viewport reference onto one.
+
+    @discardableResult
+    func addFrame(pageID: PageID, name: String, rect: Rect2D, focusNodeIDs: [NodeID] = []) -> PresentationFrame {
+        let frame = PresentationFrame(pageID: pageID, name: name, rect: rect, focusNodeIDs: focusNodeIDs)
+        insertFrame(frame, at: frames.count)
+        return frame
+    }
+
+    func updateFrame(_ frame: PresentationFrame) {
+        guard let index = frames.firstIndex(where: { $0.id == frame.id }) else { return }
+        let previous = frames[index]
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.updateFrame(previous)
+        }
+        undoManager?.setActionName("Edit Frame")
+        frames[index] = frame
+        updateChangeCount(.changeDone)
+    }
+
+    func deleteFrame(id: FrameID) {
+        guard let index = frames.firstIndex(where: { $0.id == id }) else { return }
+        let frame = frames[index]
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.insertFrame(frame, at: index)
+        }
+        undoManager?.setActionName("Delete Frame")
+        frames.remove(at: index)
+        updateChangeCount(.changeDone)
+    }
+
+    /// Reorders a frame within the slide-show sequence (drag-to-reorder in
+    /// `PresentationFramePanelView`).
+    func moveFrame(from source: Int, to destination: Int) {
+        guard frames.indices.contains(source), destination >= 0, destination <= frames.count else { return }
+        let frame = frames.remove(at: source)
+        let insertIndex = destination > source ? destination - 1 : destination
+        frames.insert(frame, at: min(insertIndex, frames.count))
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.moveFrame(from: insertIndex, to: source > insertIndex ? source + 1 : source)
+        }
+        undoManager?.setActionName("Reorder Frames")
+        updateChangeCount(.changeDone)
+    }
+
+    private func insertFrame(_ frame: PresentationFrame, at index: Int) {
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.deleteFrame(id: frame.id)
+        }
+        undoManager?.setActionName("Add Frame")
+        frames.insert(frame, at: min(index, frames.count))
         updateChangeCount(.changeDone)
     }
 

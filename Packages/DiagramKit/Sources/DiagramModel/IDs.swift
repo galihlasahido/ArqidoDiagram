@@ -29,3 +29,8 @@ public struct CustomComponentID: Hashable, Codable, Sendable {
     public let raw: UUID
     public init(_ raw: UUID = UUID()) { self.raw = raw }
 }
+
+public struct FrameID: Hashable, Codable, Sendable {
+    public let raw: UUID
+    public init(_ raw: UUID = UUID()) { self.raw = raw }
+}

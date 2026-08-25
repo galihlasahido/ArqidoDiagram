@@ -157,6 +157,16 @@ struct AppCommands: Commands {
             .keyboardShortcut("f", modifiers: .command)
         }
 
+        extraMenus
+    }
+
+    /// Split out of `body` because `Commands`' result builder — like
+    /// `ViewBuilder` — only synthesizes `buildBlock` overloads up to 10
+    /// arguments; `body` was already at that ceiling before "Presentation"
+    /// was added, so this group of menus is combined here as one extra
+    /// `body` statement instead.
+    @CommandsBuilder
+    private var extraMenus: some Commands {
         CommandMenu("Validation") {
             Button("Show Validation") {
                 NotificationCenter.default.post(name: .toggleValidation, object: nil)
@@ -227,6 +237,18 @@ struct AppCommands: Commands {
                 NotificationCenter.default.post(name: .toggleAICommandBar, object: nil)
             }
             .keyboardShortcut("k", modifiers: .command)
+        }
+
+        CommandMenu("Presentation") {
+            Button("Presentation Frames…") {
+                NotificationCenter.default.post(name: .togglePresentationFramePanel, object: nil)
+            }
+            .keyboardShortcut("p", modifiers: [.command, .shift])
+
+            Button("Play Presentation") {
+                NotificationCenter.default.post(name: .enterPresentationMode, object: nil)
+            }
+            .keyboardShortcut("p", modifiers: [.command, .option])
         }
     }
 }

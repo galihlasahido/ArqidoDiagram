@@ -232,6 +232,45 @@ final class PackageRoundTripTests: XCTestCase {
         XCTAssertTrue(try PackageReader.adrs(from: wrapper).isEmpty)
     }
 
+    func testPresentationFramesRoundTripThroughThePackage() throws {
+        let document = DiagramDocumentModel.blank(title: "Current", at: Date(timeIntervalSince1970: 0))
+        guard let pageID = document.pageOrder.first else { return XCTFail("blank document has no page") }
+        let frame = PresentationFrame(
+            pageID: pageID,
+            name: "Overview",
+            rect: Rect2D(origin: Point2D(x: 0, y: 0), size: Size2D(width: 400, height: 300)),
+            focusNodeIDs: [NodeID()]
+        )
+
+        let wrapper = try PackageWriter.fileWrapper(for: document, frames: [frame])
+        let decoded = try PackageReader.frames(from: wrapper)
+
+        XCTAssertEqual(decoded.count, 1)
+        XCTAssertEqual(decoded.first?.name, "Overview")
+        XCTAssertEqual(decoded.first?.pageID, pageID)
+        XCTAssertEqual(decoded.first?.rect, frame.rect)
+        XCTAssertEqual(decoded.first?.focusNodeIDs, frame.focusNodeIDs)
+    }
+
+    func testNoFramesYieldsAnEmptyArrayRatherThanThrowing() throws {
+        let document = DiagramDocumentModel.blank(title: "Current", at: Date(timeIntervalSince1970: 0))
+        let wrapper = try PackageWriter.fileWrapper(for: document)
+        XCTAssertTrue(try PackageReader.frames(from: wrapper).isEmpty)
+    }
+
+    func testFramesAreEncryptedWhenTheDocumentIs() throws {
+        let document = DiagramDocumentModel.blank(title: "Current", at: Date(timeIntervalSince1970: 0))
+        guard let pageID = document.pageOrder.first else { return XCTFail("blank document has no page") }
+        let frame = PresentationFrame(pageID: pageID, name: "Overview", rect: Rect2D(origin: .init(x: 0, y: 0), size: .init(width: 100, height: 100)))
+        let wrapper = try PackageWriter.fileWrapper(for: document, password: "sw0rdfish", frames: [frame])
+
+        XCTAssertThrowsError(try PackageReader.frames(from: wrapper)) { error in
+            XCTAssertEqual(error as? PackageReadError, .encryptionPasswordRequired)
+        }
+        let decoded = try PackageReader.frames(from: wrapper, password: "sw0rdfish")
+        XCTAssertEqual(decoded.first?.name, "Overview")
+    }
+
     func testCurrentSchemaVersionRoundTripsWithoutMigration() throws {
         let document = DiagramDocumentModel.blank(at: Date(timeIntervalSince1970: 0))
         XCTAssertEqual(document.schemaVersion, DiagramDocumentModel.currentSchemaVersion)

@@ -15,6 +15,7 @@ struct ContentView: View {
     @StateObject private var aiCommandBarModel = AICommandBarModel()
     @StateObject private var aiConfigurationStore = AIConfigurationStore()
     @StateObject private var adrModel = ADRModel()
+    @StateObject private var presentationFrameModel = PresentationFrameModel()
     @State private var activePageID: PageID?
 
     var body: some View {
@@ -52,6 +53,15 @@ struct ContentView: View {
                 } else if adrModel.isPresented {
                     ADRPanelView(document: document, adrModel: adrModel, selection: selection)
                         .padding(12)
+                } else if presentationFrameModel.isPresented {
+                    PresentationFramePanelView(
+                        document: document,
+                        frameModel: presentationFrameModel,
+                        inspectorBridge: inspectorBridge,
+                        activePageID: $activePageID,
+                        selection: selection
+                    )
+                    .padding(12)
                 }
             }
             .overlay(alignment: .top) {
@@ -84,6 +94,12 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .toggleADRPanel)) { _ in
             adrModel.isPresented.toggle()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .togglePresentationFramePanel)) { _ in
+            presentationFrameModel.isPresented.toggle()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .enterPresentationMode)) { _ in
+            PresentationWindowController.present(document: document, startIndex: 0)
         }
     }
 }

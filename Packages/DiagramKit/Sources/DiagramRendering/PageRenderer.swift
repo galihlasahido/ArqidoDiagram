@@ -22,16 +22,46 @@ public enum PageRenderer {
     /// thickness (matching the live canvas's `1 / viewport.scale`
     /// compensation) — pass `1` for export, where output pixels already
     /// map 1:1 to content-space points at whatever DPI the caller chose.
-    public static func draw(_ page: DiagramPage, in context: CGContext, scale: CGFloat = 1, editingNodeID: NodeID? = nil) {
+    /// `focusNodeIDs`, when non-nil and non-empty (spec's Presentation Mode
+    /// "Focus"), dims every node/edge not in the set to
+    /// `Self.focusDimAlpha` instead of drawing them at full opacity — an
+    /// edge dims only when *both* its endpoints are dimmed, so a
+    /// connection into the focused subset stays legible.
+    public static func draw(
+        _ page: DiagramPage,
+        in context: CGContext,
+        scale: CGFloat = 1,
+        editingNodeID: NodeID? = nil,
+        focusNodeIDs: Set<NodeID>? = nil
+    ) {
+        let focusSet = (focusNodeIDs?.isEmpty == false) ? focusNodeIDs : nil
+        func isDimmed(_ id: NodeID) -> Bool {
+            guard let focusSet else { return false }
+            return !focusSet.contains(id)
+        }
+
         for edge in page.edges.values.sorted(by: { $0.zIndex < $1.zIndex }) {
-            drawEdge(edge, nodes: page.nodes, in: context, scale: scale)
+            let dimmed = focusSet != nil && edgeEndpointNodeIDs(edge).allSatisfy(isDimmed)
+            drawEdge(edge, nodes: page.nodes, in: context, scale: scale, dimAlpha: dimmed ? focusDimAlpha : 1)
         }
         for node in page.nodes.values.sorted(by: { $0.zIndex < $1.zIndex }) {
-            drawNode(node, in: context, scale: scale, skipText: node.id == editingNodeID)
+            drawNode(node, in: context, scale: scale, skipText: node.id == editingNodeID, dimAlpha: isDimmed(node.id) ? focusDimAlpha : 1)
         }
     }
 
-    public static func drawNode(_ node: DiagramNode, in context: CGContext, scale: CGFloat = 1, skipText: Bool = false) {
+    /// Opacity multiplier applied to non-focused nodes/edges while
+    /// Presentation Mode's Focus is on — dim, not hidden, so the rest of
+    /// the diagram stays visible as context.
+    public static let focusDimAlpha: CGFloat = 0.2
+
+    private static func edgeEndpointNodeIDs(_ edge: DiagramEdge) -> [NodeID] {
+        [edge.source, edge.target].compactMap { endpoint in
+            if case .node(let id, _) = endpoint { return id }
+            return nil
+        }
+    }
+
+    public static func drawNode(_ node: DiagramNode, in context: CGContext, scale: CGFloat = 1, skipText: Bool = false, dimAlpha: CGFloat = 1) {
         guard !node.isHidden else { return }
         let path = ShapeGeometry.path(for: node.type, in: node.frame)
 
@@ -54,7 +84,7 @@ public enum PageRenderer {
             context.rotate(by: CGFloat(node.rotation))
             context.translateBy(x: -center.x, y: -center.y)
         }
-        context.setAlpha(node.style.opacity)
+        context.setAlpha(node.style.opacity * dimAlpha)
         context.addPath(path)
         context.setFillColor(fillColor.cgColor)
         context.setStrokeColor(strokeColor.cgColor)
@@ -114,7 +144,7 @@ public enum PageRenderer {
         attributed.draw(with: drawRect, options: [.usesLineFragmentOrigin])
     }
 
-    public static func drawEdge(_ edge: DiagramEdge, nodes: [NodeID: DiagramNode], in context: CGContext, scale: CGFloat = 1) {
+    public static func drawEdge(_ edge: DiagramEdge, nodes: [NodeID: DiagramNode], in context: CGContext, scale: CGFloat = 1, dimAlpha: CGFloat = 1) {
         guard !edge.isHidden else { return }
         let targetAim = aimPoint(for: edge.target, nodes: nodes)
         let sourceAim = aimPoint(for: edge.source, nodes: nodes)
@@ -123,6 +153,7 @@ public enum PageRenderer {
 
         let path = EdgeGeometry.path(from: source, to: target, routing: edge.routing)
         context.saveGState()
+        context.setAlpha(dimAlpha)
         context.setStrokeColor(NSColor(edge.style.strokeColor ?? .system(.systemGray)).cgColor)
         context.setLineWidth(max(edge.style.strokeWidth, 0.5) / scale)
         if edge.style.dash == .dashed {

@@ -27,13 +27,15 @@ public enum PackageWriter {
     /// the same sensitive data the current document does.
     /// `adrs` (spec §20) are written as one `adrs.json` array — unlike
     /// versions, ADRs are few and small, so there's no lazy-loading benefit
-    /// to one file per record.
+    /// to one file per record. `frames` (spec §PRESENTATION MODE) are
+    /// written the same way, as one `frames.json` array.
     public static func fileWrapper(
         for document: DiagramDocumentModel,
         appVersion: String = "0.1.0",
         password: String? = nil,
         versions: [DocumentVersion] = [],
-        adrs: [ArchitectureDecisionRecord] = []
+        adrs: [ArchitectureDecisionRecord] = [],
+        frames: [PresentationFrame] = []
     ) throws -> FileWrapper {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
@@ -85,6 +87,9 @@ public enum PackageWriter {
         ]
         if !adrs.isEmpty {
             children["adrs.json"] = FileWrapper(regularFileWithContents: try encoded(adrs))
+        }
+        if !frames.isEmpty {
+            children["frames.json"] = FileWrapper(regularFileWithContents: try encoded(frames))
         }
         if let envelope {
             children["encryption.json"] = FileWrapper(regularFileWithContents: try encoder.encode(envelope))

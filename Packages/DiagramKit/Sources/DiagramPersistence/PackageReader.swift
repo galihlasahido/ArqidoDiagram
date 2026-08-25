@@ -119,6 +119,21 @@ public enum PackageReader {
         return try decode([ArchitectureDecisionRecord].self, from: data, envelope: envelope, password: password, decoder: decoder)
     }
 
+    /// Reads back every saved `PresentationFrame` (see `PackageWriter`'s
+    /// `frames:` parameter). Missing `frames.json` (every document before
+    /// this feature existed, or one with no frames yet) yields an empty
+    /// array rather than throwing.
+    public static func frames(from wrapper: FileWrapper, password: String? = nil) throws -> [PresentationFrame] {
+        guard wrapper.isDirectory, let children = wrapper.fileWrappers else {
+            throw PackageReadError.notAPackage
+        }
+        guard let data = children["frames.json"]?.regularFileContents else { return [] }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let envelope = try readEnvelope(children: children, password: password, decoder: decoder)
+        return try decode([PresentationFrame].self, from: data, envelope: envelope, password: password, decoder: decoder)
+    }
+
     private static func readEnvelope(children: [String: FileWrapper], password: String?, decoder: JSONDecoder) throws -> DocumentEncryption.Envelope? {
         guard let envelopeData = children["encryption.json"]?.regularFileContents else { return nil }
         let envelope = try decoder.decode(DocumentEncryption.Envelope.self, from: envelopeData)

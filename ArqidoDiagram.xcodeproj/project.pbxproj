@@ -9,6 +9,7 @@
 /* Begin PBXBuildFile section */
 		0024A0285B752D0E6CB3D661 /* AISettingsView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 000F9DE1C1A4F96D4B9298F1 /* AISettingsView.swift */; };
 		034C7843AF910B5A451DBF14 /* DiagramFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 7CC0E490E2C0AB357B1BB0A0 /* DiagramFoundation */; };
+		06F248C30E4BDAE1BAF3EC36 /* PresentationFrameModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = CE19253066DF28FD435A8452 /* PresentationFrameModel.swift */; };
 		114192131104447765BAE53C /* AIConfigurationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 98FE655B53D8F492DFB10BA8 /* AIConfigurationStore.swift */; };
 		1A39CB3C0FB98B0038D71C3B /* DiagramPersistence in Frameworks */ = {isa = PBXBuildFile; productRef = 3293E56FA334AA210C33BE30 /* DiagramPersistence */; };
 		1CF5EAB53DB7B9C004A8B93A /* DiagramRendering in Frameworks */ = {isa = PBXBuildFile; productRef = ECA3272AD885FA98784B0932 /* DiagramRendering */; };
@@ -24,10 +25,12 @@
 		49B74FACCFBD5A7DCD22E3A6 /* ADRPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E0874E01891B5684C642EC27 /* ADRPanelView.swift */; };
 		6953EBE493AEA65F0DD8785A /* ShapeInsertionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325E12829E933C04377339CB /* ShapeInsertionRequest.swift */; };
 		7431EAC770DD5B1B30AFA9F0 /* ValidationPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B1719D49120024DD523AEF /* ValidationPanelView.swift */; };
+		7FC3C56F22DFCEF5F1EA4084 /* PresentationFramePanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = E006988167E999CFD7F4AA81 /* PresentationFramePanelView.swift */; };
 		8027D7A935EBB9D8B42273F9 /* SearchOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A84E2B9E3A1C093CEE48F399 /* SearchOverlayView.swift */; };
 		86751CD773F1D0B235E0FE1B /* InteropCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9AAE55FF9ECC8FA45FA1BB7C /* InteropCoordinator.swift */; };
 		8A5AE0E29173FCD425AC5DB3 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */; };
 		905F20607F9FF17C0E42C05C /* DiagramValidation in Frameworks */ = {isa = PBXBuildFile; productRef = 3A07395E1650B9D5500A9217 /* DiagramValidation */; };
+		97CCE3EF96794E7B89D3FB65 /* PresentationWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 34D9CBAE3A7A37E641F77130 /* PresentationWindowController.swift */; };
 		99BB64A60775FC6EB6F36D44 /* DiagramInterop in Frameworks */ = {isa = PBXBuildFile; productRef = 2C907133F265A933CE05BD23 /* DiagramInterop */; };
 		9B724A1BF58F29233A43FA66 /* SearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA24D528E7496C8D290A3595 /* SearchModel.swift */; };
 		A62E6C07DD68BBC90F4BE9F7 /* DiagramInteraction in Frameworks */ = {isa = PBXBuildFile; productRef = F7D637675F00F7E7335EAA60 /* DiagramInteraction */; };
@@ -41,6 +44,7 @@
 		B4BD110B95CA94C0B0899806 /* AIKeychain.swift in Sources */ = {isa = PBXBuildFile; fileRef = CD401832FC7FC5BD5C463BF2 /* AIKeychain.swift */; };
 		B4DB548EF42E1350E3D5DBD9 /* AICommandBarModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 12F1ACA3FA607E7A973702C7 /* AICommandBarModel.swift */; };
 		BD103EF5017C1E4D9B44ED6D /* DiagramCommands in Frameworks */ = {isa = PBXBuildFile; productRef = A188D553E903E92AC790DEF6 /* DiagramCommands */; };
+		BFE6821B9F180FE18E9360D8 /* PresentationHUDView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 2753106E9E9AA3744630F753 /* PresentationHUDView.swift */; };
 		C0440327D857DCB7646164A0 /* VersionHistoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6DC0679515F4377C34D7450 /* VersionHistoryModel.swift */; };
 		C2CC9AC89FE2DD85ED536CB9 /* DiagramDocumentWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944039CEA4BF2D86958B0CF8 /* DiagramDocumentWindowController.swift */; };
 		CCF51066A21E2ED6D3E387E7 /* TemplatePickerWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DCCEBDDFDEED916BC294B11 /* TemplatePickerWindowController.swift */; };
@@ -66,7 +70,9 @@
 		142C7AED24EC297399F039B6 /* ValidationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationStore.swift; sourceTree = "<group>"; };
 		219837F48E9DD01413C6FBDC /* ArqidoDiagramApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArqidoDiagramApp.swift; sourceTree = "<group>"; };
 		25064BA4FC3F3E47A7952A5F /* AppCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCommands.swift; sourceTree = "<group>"; };
+		2753106E9E9AA3744630F753 /* PresentationHUDView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PresentationHUDView.swift; sourceTree = "<group>"; };
 		325E12829E933C04377339CB /* ShapeInsertionRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeInsertionRequest.swift; sourceTree = "<group>"; };
+		34D9CBAE3A7A37E641F77130 /* PresentationWindowController.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PresentationWindowController.swift; sourceTree = "<group>"; };
 		3BFE5827FB1F7DB29704E326 /* CanvasStatusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasStatusModel.swift; sourceTree = "<group>"; };
 		3E2FBAC78BBB082FF12DEA90 /* ADREditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ADREditorView.swift; sourceTree = "<group>"; };
 		488320F0290775EF9637D887 /* StatusBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarView.swift; sourceTree = "<group>"; };
@@ -94,8 +100,10 @@
 		C8938FD75E8AD92E2B7A36E4 /* ArqidoDiagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ArqidoDiagram.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		CBC26882DD8172FD1012F325 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
 		CD401832FC7FC5BD5C463BF2 /* AIKeychain.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AIKeychain.swift; sourceTree = "<group>"; };
+		CE19253066DF28FD435A8452 /* PresentationFrameModel.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PresentationFrameModel.swift; sourceTree = "<group>"; };
 		D069B21A8816480382A0EAEB /* PageTabsView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = PageTabsView.swift; sourceTree = "<group>"; };
 		DA24D528E7496C8D290A3595 /* SearchModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchModel.swift; sourceTree = "<group>"; };
+		E006988167E999CFD7F4AA81 /* PresentationFramePanelView.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; path = PresentationFramePanelView.swift; sourceTree = "<group>"; };
 		E0874E01891B5684C642EC27 /* ADRPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ADRPanelView.swift; sourceTree = "<group>"; };
 		E4E4C08CC768980DD2BA2916 /* InspectorBridge.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorBridge.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -127,6 +135,18 @@
 				C8938FD75E8AD92E2B7A36E4 /* ArqidoDiagram.app */,
 			);
 			name = Products;
+			sourceTree = "<group>";
+		};
+		0EEF83916F40C6B9D5EB5445 /* Presentation */ = {
+			isa = PBXGroup;
+			children = (
+				CE19253066DF28FD435A8452 /* PresentationFrameModel.swift */,
+				E006988167E999CFD7F4AA81 /* PresentationFramePanelView.swift */,
+				34D9CBAE3A7A37E641F77130 /* PresentationWindowController.swift */,
+				2753106E9E9AA3744630F753 /* PresentationHUDView.swift */,
+			);
+			name = Presentation;
+			path = Presentation;
 			sourceTree = "<group>";
 		};
 		106098C530E0015278B96A90 /* AppShell */ = {
@@ -253,6 +273,7 @@
 				AEB4913E416272684B025C3B /* Templates */,
 				11A58AEA96BF296DA80F79E6 /* Validation */,
 				80DA25D61384CDD20A258476 /* Versions */,
+				0EEF83916F40C6B9D5EB5445 /* Presentation */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -351,7 +372,7 @@
 			mainGroup = E1C3EB59D4EBAC42F4EB3BB4;
 			minimizedProjectReferenceProxies = 1;
 			packageReferences = (
-				E6EA69353F4E9D0D1D46F7D6 /* XCLocalSwiftPackageReference "Packages/DiagramKit" */,
+				E6EA69353F4E9D0D1D46F7D6 /* XCLocalSwiftPackageReference "DiagramKit" */,
 			);
 			preferredProjectObjectVersion = 77;
 			productRefGroup = 0D43923587DF576E3DE1DA50 /* Products */;
@@ -416,6 +437,10 @@
 				36240E13DBD671FAD8E19C8F /* ValidationStore.swift in Sources */,
 				C0440327D857DCB7646164A0 /* VersionHistoryModel.swift in Sources */,
 				2AA1A51395EAE438ACC75558 /* VersionHistoryPanelView.swift in Sources */,
+				06F248C30E4BDAE1BAF3EC36 /* PresentationFrameModel.swift in Sources */,
+				7FC3C56F22DFCEF5F1EA4084 /* PresentationFramePanelView.swift in Sources */,
+				97CCE3EF96794E7B89D3FB65 /* PresentationWindowController.swift in Sources */,
+				BFE6821B9F180FE18E9360D8 /* PresentationHUDView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -619,7 +644,7 @@
 /* End XCConfigurationList section */
 
 /* Begin XCLocalSwiftPackageReference section */
-		E6EA69353F4E9D0D1D46F7D6 /* XCLocalSwiftPackageReference "Packages/DiagramKit" */ = {
+		E6EA69353F4E9D0D1D46F7D6 /* XCLocalSwiftPackageReference "DiagramKit" */ = {
 			isa = XCLocalSwiftPackageReference;
 			relativePath = Packages/DiagramKit;
 		};
