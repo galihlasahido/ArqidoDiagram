@@ -20,10 +20,13 @@ public enum AnyObjectID: Hashable, Sendable {
     case page(PageID)
 }
 
-// TODO(Phase 1, build-order step 8): concrete commands
-// (Add/Delete/Move/Resize/Rotate/EditText/SetStyle/SetMetadataField/AddEdge/
-// RerouteEdge/Group/Ungroup/Align/Distribute/ReorderZ/page commands) and
-// `CommandStack` (wraps `UndoManager`) land here once the canvas/interaction
-// layer needs them. Not implemented yet — this file only establishes the
-// `Command` seam so `DiagramInteraction` and the app target can depend on a
-// stable protocol from the start.
+// Concrete commands: `UpdateNodesCommand` (move/resize/rotate/style/
+// metadata/text/z-order — one generic before/after snapshot command covers
+// all of these, replacing what the plan originally sketched as many
+// structurally-identical command types), `AddNodesCommand`/
+// `RemoveNodesCommand`, `AddEdgesCommand`/`RemoveEdgesCommand`,
+// `CompositeCommand`. `CommandStack` wraps `UndoManager`. Page-level
+// commands (add/rename/delete/duplicate/reorder page) operate on
+// `DiagramDocumentModel` directly rather than through `SceneStore` — a page
+// switch is a document-level structural change, not a mutation of the
+// currently active page's live scene.

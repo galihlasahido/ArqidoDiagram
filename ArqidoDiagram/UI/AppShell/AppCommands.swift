@@ -2,17 +2,16 @@ import SwiftUI
 import AppKit
 
 /// Menu bar / keyboard shortcut wiring. `Settings {}` (see
-/// `ArqidoDiagramApp`) doesn't auto-generate a File menu the way
-/// `DocumentGroup` would, so New/Open/Save/Save As are wired explicitly here
-/// via `NSDocumentController` and the standard `NSDocument` responder-chain
-/// actions (`saveDocument:`/`saveDocumentAs:`) — the same selectors a
-/// storyboard-based document app's File menu would send.
-///
-/// Undo/Redo intentionally use SwiftUI's default `.undoRedo` command group
-/// (not replaced here): with no `CommandStack`/registered commands yet
-/// (lands at build-order step 8), they correctly show disabled, matching
-/// standard Cocoa behavior for "nothing to undo" rather than being wired to
-/// do nothing silently.
+/// `ArqidoDiagramApp`) doesn't auto-generate a File/Edit menu the way
+/// `DocumentGroup` would, so every item here is wired explicitly through the
+/// standard AppKit responder chain — `NSApp.sendAction(_:to: nil, from:)`
+/// sends to whatever object is first responder (the key document window's
+/// `DiagramCanvasView`), the same mechanism a storyboard-based app's menu
+/// bar would use. Undo/Redo route through `DiagramCanvasView.undoManager`
+/// (which overrides `NSResponder.undoManager` to expose the document's real
+/// `UndoManager`), so the standard `undo:`/`redo:` actions — and their
+/// automatic "Undo Move"/"Redo Resize" labeling via `setActionName` — work
+/// without any custom logic here.
 struct AppCommands: Commands {
     var body: some Commands {
         CommandGroup(replacing: .newItem) {
@@ -37,6 +36,78 @@ struct AppCommands: Commands {
                 NSApp.sendAction(Selector(("saveDocumentAs:")), to: nil, from: nil)
             }
             .keyboardShortcut("s", modifiers: [.command, .shift])
+        }
+
+        CommandGroup(replacing: .undoRedo) {
+            Button("Undo") {
+                NSApp.sendAction(Selector(("undo:")), to: nil, from: nil)
+            }
+            .keyboardShortcut("z", modifiers: .command)
+
+            Button("Redo") {
+                NSApp.sendAction(Selector(("redo:")), to: nil, from: nil)
+            }
+            .keyboardShortcut("z", modifiers: [.command, .shift])
+        }
+
+        CommandGroup(replacing: .pasteboard) {
+            Button("Cut") {
+                NSApp.sendAction(#selector(NSText.cut(_:)), to: nil, from: nil)
+            }
+            .keyboardShortcut("x", modifiers: .command)
+
+            Button("Copy") {
+                NSApp.sendAction(#selector(NSText.copy(_:)), to: nil, from: nil)
+            }
+            .keyboardShortcut("c", modifiers: .command)
+
+            Button("Paste") {
+                NSApp.sendAction(#selector(NSText.paste(_:)), to: nil, from: nil)
+            }
+            .keyboardShortcut("v", modifiers: .command)
+
+            Divider()
+
+            Button("Duplicate") {
+                NSApp.sendAction(Selector(("duplicate:")), to: nil, from: nil)
+            }
+            .keyboardShortcut("d", modifiers: .command)
+
+            Button("Delete") {
+                NSApp.sendAction(Selector(("delete:")), to: nil, from: nil)
+            }
+            .keyboardShortcut(.delete, modifiers: [])
+
+            Divider()
+
+            Button("Select All") {
+                NSApp.sendAction(#selector(NSResponder.selectAll(_:)), to: nil, from: nil)
+            }
+            .keyboardShortcut("a", modifiers: .command)
+        }
+
+        CommandMenu("Arrange") {
+            Button("Bring Forward") {
+                NSApp.sendAction(Selector(("bringForward:")), to: nil, from: nil)
+            }
+            .keyboardShortcut("]", modifiers: .command)
+
+            Button("Send Backward") {
+                NSApp.sendAction(Selector(("sendBackward:")), to: nil, from: nil)
+            }
+            .keyboardShortcut("[", modifiers: .command)
+
+            Divider()
+
+            Button("Group") {
+                NSApp.sendAction(Selector(("groupSelection:")), to: nil, from: nil)
+            }
+            .keyboardShortcut("g", modifiers: .command)
+
+            Button("Ungroup") {
+                NSApp.sendAction(Selector(("ungroupSelection:")), to: nil, from: nil)
+            }
+            .keyboardShortcut("g", modifiers: [.command, .shift])
         }
 
         CommandGroup(after: .toolbar) {

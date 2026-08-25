@@ -19,7 +19,7 @@ public struct TextContent: Codable, Hashable, Sendable {
     }
 }
 
-public struct DiagramNode: Codable, Identifiable, Sendable {
+public struct DiagramNode: Codable, Identifiable, Hashable, Sendable {
     public var id: NodeID
     public var type: ShapeType
     /// Top-left, in page-local coordinates.

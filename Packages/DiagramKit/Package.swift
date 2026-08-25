@@ -29,10 +29,16 @@ let package = Package(
         // .diagram package read/write, schema migration.
         .target(name: "DiagramPersistence", dependencies: ["DiagramModel"]),
 
-        // NSView-based canvas, Core Graphics drawing, spatial index. AppKit, not SwiftUI.
-        .target(name: "DiagramRendering", dependencies: ["DiagramModel"]),
+        // NSView-based canvas, Core Graphics drawing, spatial index,
+        // selection/move/resize/rotate interaction. AppKit, not SwiftUI.
+        // Depends on DiagramCommands: interaction lives directly on
+        // DiagramCanvasView rather than behind a separate tool-dispatch
+        // layer (see that file's doc comment for why) — DiagramInteraction
+        // remains reserved for a genuinely distinct future mode
+        // (draw-connector, step 13).
+        .target(name: "DiagramRendering", dependencies: ["DiagramModel", "DiagramCommands"]),
 
-        // Tool state machines (select/move/resize/draw-connector/text).
+        // Reserved: draw-connector tool state machine (step 13).
         .target(
             name: "DiagramInteraction",
             dependencies: ["DiagramModel", "DiagramRendering", "DiagramCommands"]

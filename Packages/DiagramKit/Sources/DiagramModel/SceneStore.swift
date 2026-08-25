@@ -77,4 +77,12 @@ public final class SceneStore {
         edges.removeValue(forKey: id)
         edgeZOrder.removeAll { $0 == id }
     }
+
+    public func setGroup(_ group: DiagramGroup) {
+        groups[group.id] = group
+    }
+
+    public func removeGroup(_ id: GroupID) {
+        groups.removeValue(forKey: id)
+    }
 }

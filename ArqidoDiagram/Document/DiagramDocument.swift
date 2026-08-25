@@ -24,6 +24,16 @@ final class DiagramDocument: NSDocument, ObservableObject {
         super.init()
     }
 
+    /// Writes a page's live content (nodes/edges/groups/z-order) back into
+    /// `model` — the canvas's `SceneStore` is the source of truth while
+    /// editing, but `model` is what `fileWrapper(ofType:)` actually
+    /// persists, so every committed canvas edit needs to land here (see
+    /// `DiagramCanvasView.onSceneChanged`).
+    func updatePage(_ page: DiagramPage) {
+        model.pages[page.id] = page
+        model.modifiedAt = Date()
+    }
+
     override class var autosavesInPlace: Bool { true }
 
     override func makeWindowControllers() {

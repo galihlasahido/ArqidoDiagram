@@ -20,7 +20,7 @@ public struct EdgeLabel: Codable, Hashable, Sendable {
     }
 }
 
-public struct DiagramEdge: Codable, Identifiable, Sendable {
+public struct DiagramEdge: Codable, Identifiable, Hashable, Sendable {
     public var id: EdgeID
     public var source: EndpointRef
     public var target: EndpointRef

@@ -13,6 +13,7 @@
 		226500684F8D33309AB360A9 /* DiagramDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 664420670A4167E8F7B57114 /* DiagramDocument.swift */; };
 		22CC877A4DA7FBF7032917AF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC26882DD8172FD1012F325 /* ContentView.swift */; };
 		313C3528020CF88B9388AD55 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD41EC125B8CA9E44C02822 /* InspectorView.swift */; };
+		6953EBE493AEA65F0DD8785A /* ShapeInsertionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325E12829E933C04377339CB /* ShapeInsertionRequest.swift */; };
 		8A5AE0E29173FCD425AC5DB3 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */; };
 		A62E6C07DD68BBC90F4BE9F7 /* DiagramInteraction in Frameworks */ = {isa = PBXBuildFile; productRef = F7D637675F00F7E7335EAA60 /* DiagramInteraction */; };
 		A6FC6CAD90F492114CA034EB /* SelectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */; };
@@ -32,6 +33,7 @@
 		0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarView.swift; sourceTree = "<group>"; };
 		219837F48E9DD01413C6FBDC /* ArqidoDiagramApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArqidoDiagramApp.swift; sourceTree = "<group>"; };
 		25064BA4FC3F3E47A7952A5F /* AppCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCommands.swift; sourceTree = "<group>"; };
+		325E12829E933C04377339CB /* ShapeInsertionRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeInsertionRequest.swift; sourceTree = "<group>"; };
 		3BFE5827FB1F7DB29704E326 /* CanvasStatusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasStatusModel.swift; sourceTree = "<group>"; };
 		488320F0290775EF9637D887 /* StatusBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarView.swift; sourceTree = "<group>"; };
 		4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasHostView.swift; sourceTree = "<group>"; };
@@ -111,6 +113,7 @@
 				4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */,
 				3BFE5827FB1F7DB29704E326 /* CanvasStatusModel.swift */,
 				7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */,
+				325E12829E933C04377339CB /* ShapeInsertionRequest.swift */,
 			);
 			path = Canvas;
 			sourceTree = "<group>";
@@ -246,6 +249,7 @@
 				313C3528020CF88B9388AD55 /* InspectorView.swift in Sources */,
 				8A5AE0E29173FCD425AC5DB3 /* LibrarySidebarView.swift in Sources */,
 				A6FC6CAD90F492114CA034EB /* SelectionModel.swift in Sources */,
+				6953EBE493AEA65F0DD8785A /* ShapeInsertionRequest.swift in Sources */,
 				AFE71D5A194BDCE67CD4CEC9 /* StatusBarView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
