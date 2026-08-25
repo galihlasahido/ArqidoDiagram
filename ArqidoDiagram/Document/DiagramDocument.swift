@@ -176,6 +176,24 @@ final class DiagramDocument: NSDocument, ObservableObject {
         true
     }
 
+    // MARK: - Documentation export
+    //
+    // Spec §21 "Documentation": Export: Markdown, HTML, PDF. Lives here
+    // (not DiagramCanvasView) since it walks every page's metadata, not
+    // just the currently-active one.
+
+    @objc func exportDocumentationMarkdown(_ sender: Any?) {
+        DocumentationExporter.presentSavePanelAndExport(document: self, format: .markdown, window: windowControllers.first?.window)
+    }
+
+    @objc func exportDocumentationHTML(_ sender: Any?) {
+        DocumentationExporter.presentSavePanelAndExport(document: self, format: .html, window: windowControllers.first?.window)
+    }
+
+    @objc func exportDocumentationPDF(_ sender: Any?) {
+        DocumentationExporter.presentSavePanelAndExport(document: self, format: .pdf, window: windowControllers.first?.window)
+    }
+
     // MARK: - Versioning
     //
     // Spec §VERSIONING: "Snapshot, Restore, Compare, Version notes".

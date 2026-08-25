@@ -59,6 +59,10 @@ struct AppCommands: Commands {
                 Button("Graphviz DOT…") { NSApp.sendAction(Selector(("exportGraphvizDOT:")), to: nil, from: nil) }
                 Button("Architecture YAML…") { NSApp.sendAction(Selector(("exportArchitectureYAML:")), to: nil, from: nil) }
                 Button("SQL…") { NSApp.sendAction(Selector(("exportSQL:")), to: nil, from: nil) }
+                Divider()
+                Button("Documentation (Markdown)…") { NSApp.sendAction(Selector(("exportDocumentationMarkdown:")), to: nil, from: nil) }
+                Button("Documentation (HTML)…") { NSApp.sendAction(Selector(("exportDocumentationHTML:")), to: nil, from: nil) }
+                Button("Documentation (PDF)…") { NSApp.sendAction(Selector(("exportDocumentationPDF:")), to: nil, from: nil) }
             }
 
             Button("Set Document Password…") {
