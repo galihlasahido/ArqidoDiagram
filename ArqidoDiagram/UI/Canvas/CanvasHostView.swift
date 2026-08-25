@@ -38,6 +38,12 @@ struct CanvasHostView: NSViewRepresentable {
         view.onCopyAsSVGRequested = { page in
             ExportCoordinator.copyAsSVG(page: page)
         }
+        view.onTextExportRequested = { [weak view] page, format in
+            InteropCoordinator.presentSavePanelAndExportText(page: page, format: format, architectureName: document.model.title, window: view?.window)
+        }
+        view.onImportRequested = { [weak view] in
+            InteropCoordinator.presentOpenPanelAndImport(canvasView: view, window: view?.window)
+        }
         view.onComponentSaved = { component in
             componentStore.save(component)
         }

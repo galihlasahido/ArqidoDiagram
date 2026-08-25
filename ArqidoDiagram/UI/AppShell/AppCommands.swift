@@ -29,6 +29,11 @@ struct AppCommands: Commands {
                 NSDocumentController.shared.openDocument(nil)
             }
             .keyboardShortcut("o", modifiers: .command)
+
+            Button("Import…") {
+                NSApp.sendAction(Selector(("importFile:")), to: nil, from: nil)
+            }
+            .keyboardShortcut("i", modifiers: [.command, .shift])
         }
 
         CommandGroup(replacing: .saveItem) {
@@ -48,6 +53,12 @@ struct AppCommands: Commands {
                 Button("PNG…") { NSApp.sendAction(Selector(("exportPNG:")), to: nil, from: nil) }
                 Button("PDF…") { NSApp.sendAction(Selector(("exportPDF:")), to: nil, from: nil) }
                 Button("SVG…") { NSApp.sendAction(Selector(("exportSVG:")), to: nil, from: nil) }
+                Divider()
+                Button("Mermaid…") { NSApp.sendAction(Selector(("exportMermaid:")), to: nil, from: nil) }
+                Button("PlantUML…") { NSApp.sendAction(Selector(("exportPlantUML:")), to: nil, from: nil) }
+                Button("Graphviz DOT…") { NSApp.sendAction(Selector(("exportGraphvizDOT:")), to: nil, from: nil) }
+                Button("Architecture YAML…") { NSApp.sendAction(Selector(("exportArchitectureYAML:")), to: nil, from: nil) }
+                Button("SQL…") { NSApp.sendAction(Selector(("exportSQL:")), to: nil, from: nil) }
             }
 
             Button("Set Document Password…") {

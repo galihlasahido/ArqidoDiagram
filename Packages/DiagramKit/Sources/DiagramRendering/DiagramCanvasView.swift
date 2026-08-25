@@ -193,14 +193,28 @@ public final class DiagramCanvasView: NSView {
 
     public enum ExportFormat { case png, pdf, svg }
 
+    /// Text-based exports (spec §23/§28) — Mermaid/PlantUML/Graphviz DOT/
+    /// Architecture-as-Code YAML/SQL DDL — go through the same closure
+    /// pattern as PNG/PDF/SVG: `DiagramInterop` has no place in this
+    /// AppKit-only module, so generating the actual text and presenting
+    /// the save panel both live in the app target.
+    public enum TextExportFormat { case mermaid, plantUML, graphvizDOT, architectureYAML, sql }
+
     public var onExportRequested: ((DiagramPage, ExportFormat) -> Void)?
     public var onCopyAsSVGRequested: ((DiagramPage) -> Void)?
+    public var onTextExportRequested: ((DiagramPage, TextExportFormat) -> Void)?
 
     /// Fired after `saveSelectionAsComponent` captures a component and the
     /// user confirms the name/category prompt — the app target persists it
     /// via `CustomComponentLibrary` (file I/O has no place in this AppKit-
     /// only, Foundation-testable module).
     public var onComponentSaved: ((CustomComponent) -> Void)?
+
+    /// File > Import… (spec §22): the app target owns the open panel,
+    /// format detection, and `DiagramInterop` parsing, then calls back
+    /// into `insertGeneratedNodes` with the result — this view never needs
+    /// to know an importable format exists.
+    public var onImportRequested: (() -> Void)?
 
     private func exportSnapshot() -> DiagramPage {
         scene.snapshot(name: "Export", order: 0, canvasSize: nil, background: PageBackground())
@@ -210,6 +224,13 @@ public final class DiagramCanvasView: NSView {
     @objc public func exportPDF(_ sender: Any?) { onExportRequested?(exportSnapshot(), .pdf) }
     @objc public func exportSVG(_ sender: Any?) { onExportRequested?(exportSnapshot(), .svg) }
     @objc public func copyAsSVG(_ sender: Any?) { onCopyAsSVGRequested?(exportSnapshot()) }
+
+    @objc public func exportMermaid(_ sender: Any?) { onTextExportRequested?(exportSnapshot(), .mermaid) }
+    @objc public func exportPlantUML(_ sender: Any?) { onTextExportRequested?(exportSnapshot(), .plantUML) }
+    @objc public func exportGraphvizDOT(_ sender: Any?) { onTextExportRequested?(exportSnapshot(), .graphvizDOT) }
+    @objc public func exportArchitectureYAML(_ sender: Any?) { onTextExportRequested?(exportSnapshot(), .architectureYAML) }
+    @objc public func exportSQL(_ sender: Any?) { onTextExportRequested?(exportSnapshot(), .sql) }
+    @objc public func importFile(_ sender: Any?) { onImportRequested?() }
 
     /// The Inspector's write path: applies `transform` to every currently
     /// selected node and commits one `UpdateNodesCommand`. Fields that only
