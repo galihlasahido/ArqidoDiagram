@@ -13,6 +13,7 @@ struct CanvasHostView: NSViewRepresentable {
     @ObservedObject var status: CanvasStatusModel
     @ObservedObject var selection: SelectionModel
     @ObservedObject var shapeInsertion: ShapeInsertionRequest
+    @ObservedObject var inspectorBridge: InspectorBridge
 
     func makeNSView(context: Context) -> DiagramCanvasView {
         let view = DiagramCanvasView()
@@ -27,6 +28,7 @@ struct CanvasHostView: NSViewRepresentable {
             guard let view else { return }
             writeBack(from: view)
         }
+        inspectorBridge.canvasView = view
         loadCurrentPage(into: view)
         return view
     }

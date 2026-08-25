@@ -23,7 +23,7 @@ private final class Harness {
         view.viewport = CanvasViewport(scale: 1, contentOrigin: .zero)
     }
 
-    private func event(_ type: NSEvent.EventType, at viewPoint: CGPoint, modifiers: NSEvent.ModifierFlags) -> NSEvent {
+    private func event(_ type: NSEvent.EventType, at viewPoint: CGPoint, modifiers: NSEvent.ModifierFlags, clickCount: Int = 1) -> NSEvent {
         let windowPoint = view.convert(viewPoint, to: nil)
         return NSEvent.mouseEvent(
             with: type,
@@ -33,7 +33,7 @@ private final class Harness {
             windowNumber: window.windowNumber,
             context: nil,
             eventNumber: 0,
-            clickCount: 1,
+            clickCount: clickCount,
             pressure: 1
         )!
     }
@@ -41,6 +41,12 @@ private final class Harness {
     func click(at point: CGPoint, modifiers: NSEvent.ModifierFlags = []) {
         view.mouseDown(with: event(.leftMouseDown, at: point, modifiers: modifiers))
         view.mouseUp(with: event(.leftMouseUp, at: point, modifiers: modifiers))
+    }
+
+    func doubleClick(at point: CGPoint) {
+        view.mouseDown(with: event(.leftMouseDown, at: point, modifiers: [], clickCount: 1))
+        view.mouseUp(with: event(.leftMouseUp, at: point, modifiers: [], clickCount: 1))
+        view.mouseDown(with: event(.leftMouseDown, at: point, modifiers: [], clickCount: 2))
     }
 
     func drag(from start: CGPoint, to end: CGPoint, modifiers: NSEvent.ModifierFlags = []) {
@@ -382,5 +388,77 @@ final class DiagramCanvasViewInteractionTests: XCTestCase {
 
         h.view.paste(nil)
         XCTAssertEqual(h.view.nodeCount, 1, "cut should have left a pasteable copy on the pasteboard")
+    }
+
+    // MARK: - Text editing
+
+    func testDoubleClickEntersTextEditingAndCommitsOnEndEditing() {
+        let h = Harness()
+        let node = makeNode(x: 100, y: 100, w: 200, h: 100)
+        h.view.loadPage(page(with: [node]))
+
+        h.doubleClick(at: CGPoint(x: 200, y: 150))
+        let field = h.view.subviews.compactMap { $0 as? NSTextField }.first
+        XCTAssertNotNil(field, "double-click should overlay a real NSTextField for editing")
+
+        field?.stringValue = "Hello"
+        h.view.controlTextDidEndEditing(Notification(name: NSControl.textDidEndEditingNotification))
+
+        XCTAssertTrue(h.view.subviews.compactMap { $0 as? NSTextField }.isEmpty, "editor overlay should be removed after commit")
+        let snapshot = h.view.currentPageSnapshot(name: "Test", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.nodes[node.id]?.text?.string, "Hello")
+    }
+
+    func testTextEditIsUndoable() {
+        let h = Harness()
+        var node = makeNode(x: 100, y: 100, w: 200, h: 100)
+        node.text = TextContent(string: "Original")
+        h.view.loadPage(page(with: [node]))
+        let undoManager = UndoManager()
+        h.view.documentUndoManager = undoManager
+
+        h.doubleClick(at: CGPoint(x: 200, y: 150))
+        h.view.subviews.compactMap { $0 as? NSTextField }.first?.stringValue = "Changed"
+        h.view.controlTextDidEndEditing(Notification(name: NSControl.textDidEndEditingNotification))
+
+        var snapshot = h.view.currentPageSnapshot(name: "Test", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.nodes[node.id]?.text?.string, "Changed")
+
+        undoManager.undo()
+        snapshot = h.view.currentPageSnapshot(name: "Test", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.nodes[node.id]?.text?.string, "Original")
+    }
+
+    // MARK: - Inspector write path
+
+    func testUpdateSelectedNodesAppliesToEverySelectedNodeAndIsUndoable() {
+        let h = Harness()
+        let a = makeNode(x: 0)
+        let b = makeNode(x: 300)
+        h.view.loadPage(page(with: [a, b]))
+        h.view.applyExternalSelection([a.id, b.id])
+        let undoManager = UndoManager()
+        h.view.documentUndoManager = undoManager
+
+        h.view.updateSelectedNodes(actionName: "Set Opacity") { $0.style.opacity = 0.5 }
+
+        var snapshot = h.view.currentPageSnapshot(name: "Test", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.nodes[a.id]?.style.opacity, 0.5)
+        XCTAssertEqual(snapshot.nodes[b.id]?.style.opacity, 0.5)
+
+        undoManager.undo()
+        snapshot = h.view.currentPageSnapshot(name: "Test", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.nodes[a.id]?.style.opacity, 1)
+    }
+
+    func testUpdateSelectedNodesNoOpsWithEmptySelection() {
+        let h = Harness()
+        let node = makeNode()
+        h.view.loadPage(page(with: [node]))
+        let undoManager = UndoManager()
+        h.view.documentUndoManager = undoManager
+
+        h.view.updateSelectedNodes(actionName: "Set Opacity") { $0.style.opacity = 0.2 }
+        XCTAssertFalse(undoManager.canUndo)
     }
 }

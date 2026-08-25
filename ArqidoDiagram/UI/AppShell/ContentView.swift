@@ -5,6 +5,7 @@ struct ContentView: View {
     @StateObject private var canvasStatus = CanvasStatusModel()
     @StateObject private var selection = SelectionModel()
     @StateObject private var shapeInsertion = ShapeInsertionRequest()
+    @StateObject private var inspectorBridge = InspectorBridge()
 
     var body: some View {
         NavigationSplitView {
@@ -14,11 +15,17 @@ struct ContentView: View {
             // Explicitly given no ideal width so it absorbs whatever the
             // sidebar/inspector columns don't claim — the canvas, not the
             // inspector, should be the pane that expands.
-            CanvasHostView(document: document, status: canvasStatus, selection: selection, shapeInsertion: shapeInsertion)
-                .navigationSplitViewColumnWidth(min: 400, ideal: 900)
-                .navigationTitle(document.model.title)
+            CanvasHostView(
+                document: document,
+                status: canvasStatus,
+                selection: selection,
+                shapeInsertion: shapeInsertion,
+                inspectorBridge: inspectorBridge
+            )
+            .navigationSplitViewColumnWidth(min: 400, ideal: 900)
+            .navigationTitle(document.model.title)
         } detail: {
-            InspectorView()
+            InspectorView(document: document, selection: selection, bridge: inspectorBridge)
                 .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 360)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {

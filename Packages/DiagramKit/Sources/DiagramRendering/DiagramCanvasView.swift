@@ -16,8 +16,7 @@ import DiagramCommands
 /// it, at Phase 1's feature set. Revisit once draw-connector (step 13)
 /// introduces a genuinely different interaction mode.
 ///
-/// TODO(later build-order steps): text rendering/editing (step 11), edges
-/// (step 13).
+/// TODO(later build-order steps): edges/connectors (step 13).
 public final class DiagramCanvasView: NSView {
     public var viewport = CanvasViewport() {
         didSet {
@@ -168,6 +167,27 @@ public final class DiagramCanvasView: NSView {
     /// `SceneStore` — the caller supplies the current values for those.
     public func currentPageSnapshot(name: String, order: Int, canvasSize: Size2D?, background: PageBackground) -> DiagramPage {
         scene.snapshot(name: name, order: order, canvasSize: canvasSize, background: background)
+    }
+
+    /// The Inspector's write path: applies `transform` to every currently
+    /// selected node and commits one `UpdateNodesCommand`. Fields that only
+    /// make sense for a single node (position/size/rotation) are the
+    /// Inspector's responsibility to only show when `selection.count == 1`
+    /// — this method itself is happy to apply the same transform across a
+    /// multi-selection (e.g. setting fill color or criticality uniformly).
+    public func updateSelectedNodes(actionName: String, _ transform: (inout DiagramNode) -> Void) {
+        guard !selection.isEmpty else { return }
+        var before: [NodeID: DiagramNode] = [:]
+        var after: [NodeID: DiagramNode] = [:]
+        for id in selection {
+            guard let original = scene.nodes[id] else { continue }
+            var updated = original
+            transform(&updated)
+            before[id] = original
+            after[id] = updated
+        }
+        guard before != after else { return }
+        perform(UpdateNodesCommand(before: before, after: after), actionName: actionName)
     }
 
     private func syncSpatialIndex(for ids: [AnyObjectID]) {
@@ -398,6 +418,73 @@ public final class DiagramCanvasView: NSView {
         return result
     }
 
+    // MARK: - Text editing
+
+    private var activeTextEditor: NSTextField?
+    private var editingNodeID: NodeID?
+
+    /// Double-click enters text editing via a real `NSTextField` overlaid
+    /// exactly on the node's view-space frame — not a custom-drawn editing
+    /// affordance. Rendering the committed text (when not editing) is
+    /// `drawText(_:in:)`, via `NSAttributedString.draw(in:)`.
+    private func beginTextEditing(_ id: NodeID) {
+        guard let node = scene.nodes[id] else { return }
+        endTextEditing(commit: true)
+
+        let viewFrame = node.frame.applying(viewport.contentToViewTransform)
+        let field = NSTextField(frame: viewFrame)
+        field.stringValue = node.text?.string ?? ""
+        field.isBordered = true
+        field.backgroundColor = .textBackgroundColor
+        field.font = .systemFont(ofSize: CGFloat(node.style.font?.size ?? 13))
+        field.alignment = .center
+        field.delegate = self
+        field.usesSingleLineMode = false
+        field.cell?.wraps = true
+
+        addSubview(field)
+        window?.makeFirstResponder(field)
+        activeTextEditor = field
+        editingNodeID = id
+    }
+
+    private func endTextEditing(commit: Bool) {
+        guard let field = activeTextEditor, let id = editingNodeID else { return }
+        if commit, let original = scene.nodes[id] {
+            var updated = original
+            let trimmed = field.stringValue
+            updated.text = trimmed.isEmpty ? nil : TextContent(string: trimmed)
+            if updated != original {
+                perform(UpdateNodesCommand(before: [id: original], after: [id: updated]), actionName: "Edit Text")
+            }
+        }
+        field.removeFromSuperview()
+        activeTextEditor = nil
+        editingNodeID = nil
+        window?.makeFirstResponder(self)
+    }
+
+    private func drawText(_ node: DiagramNode, in context: CGContext) {
+        guard let text = node.text, !text.string.isEmpty, node.id != editingNodeID else { return }
+
+        let previous = NSGraphicsContext.current
+        NSGraphicsContext.current = NSGraphicsContext(cgContext: context, flipped: isFlipped)
+        defer { NSGraphicsContext.current = previous }
+
+        let paragraph = NSMutableParagraphStyle()
+        paragraph.alignment = .center
+        let attributed = NSAttributedString(string: text.string, attributes: [
+            .font: NSFont.systemFont(ofSize: CGFloat(node.style.font?.size ?? 13)),
+            .foregroundColor: NSColor.labelColor,
+            .paragraphStyle: paragraph
+        ])
+
+        let insetRect = node.frame.insetBy(dx: 6, dy: 6)
+        let fitted = attributed.boundingRect(with: insetRect.size, options: [.usesLineFragmentOrigin])
+        let drawRect = CGRect(x: insetRect.minX, y: insetRect.midY - fitted.height / 2, width: insetRect.width, height: fitted.height)
+        attributed.draw(with: drawRect, options: [.usesLineFragmentOrigin])
+    }
+
     // MARK: - Mouse / gestures
 
     private enum DragMode {
@@ -454,6 +541,11 @@ public final class DiagramCanvasView: NSView {
         let viewPoint = convert(event.locationInWindow, from: nil)
         let contentPoint = viewport.viewToContent(point: viewPoint)
         let isExtending = event.modifierFlags.contains(.shift) || event.modifierFlags.contains(.command)
+
+        if event.clickCount >= 2, let hitID = topmostNode(at: contentPoint) {
+            beginTextEditing(hitID)
+            return
+        }
 
         if !isExtending, !selection.isEmpty, let (handle, bounds) = hitResizeHandle(atView: viewPoint) {
             let frames = Dictionary(uniqueKeysWithValues: selection.compactMap { id -> (NodeID, CGRect)? in
@@ -673,9 +765,8 @@ public final class DiagramCanvasView: NSView {
         context.setStrokeColor(strokeColor.cgColor)
         context.setLineWidth(max(node.style.strokeWidth, 0.5) / viewport.scale)
         context.drawPath(using: node.style.strokeWidth > 0 ? .fillStroke : .fill)
+        drawText(node, in: context) // inside the same rotation transform, so text rotates with the shape
         context.restoreGState()
-
-        // TODO(step 11): draw node.text via CTFramesetter/NSAttributedString.
     }
 
     private func drawSelectionHighlights(in context: CGContext) {
@@ -812,5 +903,19 @@ public final class DiagramCanvasView: NSView {
 extension DiagramNode {
     var frame: CGRect {
         CGRect(x: position.x, y: position.y, width: size.width, height: size.height)
+    }
+}
+
+extension DiagramCanvasView: NSTextFieldDelegate {
+    public func controlTextDidEndEditing(_ obj: Notification) {
+        endTextEditing(commit: true)
+    }
+
+    public func control(_ control: NSControl, textView: NSTextView, doCommandBy commandSelector: Selector) -> Bool {
+        if commandSelector == #selector(NSResponder.cancelOperation(_:)) {
+            endTextEditing(commit: false)
+            return true
+        }
+        return false
     }
 }
