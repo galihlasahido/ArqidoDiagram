@@ -51,3 +51,5 @@ targets:
         product: DiagramExport
       - package: DiagramKit
         product: DiagramFoundation
+      - package: DiagramKit
+        product: DiagramValidation

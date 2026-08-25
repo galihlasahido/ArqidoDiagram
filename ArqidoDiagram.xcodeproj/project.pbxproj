@@ -12,14 +12,19 @@
 		1CF5EAB53DB7B9C004A8B93A /* DiagramRendering in Frameworks */ = {isa = PBXBuildFile; productRef = ECA3272AD885FA98784B0932 /* DiagramRendering */; };
 		226500684F8D33309AB360A9 /* DiagramDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 664420670A4167E8F7B57114 /* DiagramDocument.swift */; };
 		22CC877A4DA7FBF7032917AF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC26882DD8172FD1012F325 /* ContentView.swift */; };
+		30849A93609B16BC8256A73E /* ValidationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0467D4007E200E001E3910C5 /* ValidationModel.swift */; };
 		313C3528020CF88B9388AD55 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD41EC125B8CA9E44C02822 /* InspectorView.swift */; };
+		36240E13DBD671FAD8E19C8F /* ValidationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142C7AED24EC297399F039B6 /* ValidationStore.swift */; };
 		4070B241E7F75DFE01419BFC /* ExportCoordinator.swift in Sources */ = {isa = PBXBuildFile; fileRef = AFE97C4A706BBEE597FC5D32 /* ExportCoordinator.swift */; };
 		6953EBE493AEA65F0DD8785A /* ShapeInsertionRequest.swift in Sources */ = {isa = PBXBuildFile; fileRef = 325E12829E933C04377339CB /* ShapeInsertionRequest.swift */; };
+		7431EAC770DD5B1B30AFA9F0 /* ValidationPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 82B1719D49120024DD523AEF /* ValidationPanelView.swift */; };
 		8027D7A935EBB9D8B42273F9 /* SearchOverlayView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A84E2B9E3A1C093CEE48F399 /* SearchOverlayView.swift */; };
 		8A5AE0E29173FCD425AC5DB3 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */; };
+		905F20607F9FF17C0E42C05C /* DiagramValidation in Frameworks */ = {isa = PBXBuildFile; productRef = 3A07395E1650B9D5500A9217 /* DiagramValidation */; };
 		9B724A1BF58F29233A43FA66 /* SearchModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = DA24D528E7496C8D290A3595 /* SearchModel.swift */; };
 		A62E6C07DD68BBC90F4BE9F7 /* DiagramInteraction in Frameworks */ = {isa = PBXBuildFile; productRef = F7D637675F00F7E7335EAA60 /* DiagramInteraction */; };
 		A6FC6CAD90F492114CA034EB /* SelectionModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */; };
+		AD018F6699D63F47DF717278 /* CustomRuleEditorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = A780AF6A3CCA0588EF2BDC0E /* CustomRuleEditorView.swift */; };
 		ADA29FD3842F9982F88598B3 /* CanvasStatusModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFE5827FB1F7DB29704E326 /* CanvasStatusModel.swift */; };
 		ADB8273E3D5567ED1946BAAC /* DiagramModel in Frameworks */ = {isa = PBXBuildFile; productRef = 317559AC58264CCDDC9699B6 /* DiagramModel */; };
 		AF4768870B62DF81B5C0961E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B039D17C71B630291DB01003 /* Assets.xcassets */; };
@@ -37,6 +42,8 @@
 
 /* Begin PBXFileReference section */
 		0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarView.swift; sourceTree = "<group>"; };
+		0467D4007E200E001E3910C5 /* ValidationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationModel.swift; sourceTree = "<group>"; };
+		142C7AED24EC297399F039B6 /* ValidationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationStore.swift; sourceTree = "<group>"; };
 		219837F48E9DD01413C6FBDC /* ArqidoDiagramApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArqidoDiagramApp.swift; sourceTree = "<group>"; };
 		25064BA4FC3F3E47A7952A5F /* AppCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCommands.swift; sourceTree = "<group>"; };
 		325E12829E933C04377339CB /* ShapeInsertionRequest.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ShapeInsertionRequest.swift; sourceTree = "<group>"; };
@@ -46,7 +53,9 @@
 		4FD41EC125B8CA9E44C02822 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
 		664420670A4167E8F7B57114 /* DiagramDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocument.swift; sourceTree = "<group>"; };
 		7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionModel.swift; sourceTree = "<group>"; };
+		82B1719D49120024DD523AEF /* ValidationPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationPanelView.swift; sourceTree = "<group>"; };
 		944039CEA4BF2D86958B0CF8 /* DiagramDocumentWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocumentWindowController.swift; sourceTree = "<group>"; };
+		A780AF6A3CCA0588EF2BDC0E /* CustomRuleEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomRuleEditorView.swift; sourceTree = "<group>"; };
 		A84E2B9E3A1C093CEE48F399 /* SearchOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchOverlayView.swift; sourceTree = "<group>"; };
 		AC0AC164C4B632D1A80B8B69 /* DiagramKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DiagramKit; path = Packages/DiagramKit; sourceTree = SOURCE_ROOT; };
 		AFE97C4A706BBEE597FC5D32 /* ExportCoordinator.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ExportCoordinator.swift; sourceTree = "<group>"; };
@@ -71,6 +80,7 @@
 				A62E6C07DD68BBC90F4BE9F7 /* DiagramInteraction in Frameworks */,
 				B056DA583012F4ECD70AF47E /* DiagramExport in Frameworks */,
 				034C7843AF910B5A451DBF14 /* DiagramFoundation in Frameworks */,
+				905F20607F9FF17C0E42C05C /* DiagramValidation in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -93,6 +103,17 @@
 				488320F0290775EF9637D887 /* StatusBarView.swift */,
 			);
 			path = AppShell;
+			sourceTree = "<group>";
+		};
+		11A58AEA96BF296DA80F79E6 /* Validation */ = {
+			isa = PBXGroup;
+			children = (
+				A780AF6A3CCA0588EF2BDC0E /* CustomRuleEditorView.swift */,
+				0467D4007E200E001E3910C5 /* ValidationModel.swift */,
+				82B1719D49120024DD523AEF /* ValidationPanelView.swift */,
+				142C7AED24EC297399F039B6 /* ValidationStore.swift */,
+			);
+			path = Validation;
 			sourceTree = "<group>";
 		};
 		29509DA53928E9C7F8DEE861 /* Inspector */ = {
@@ -159,6 +180,7 @@
 				6EE2B0450C8C0A51C84EAA2D /* Pages */,
 				917F083DC78151E168A38437 /* Search */,
 				47C1C81FECA6B1A3C387B3B0 /* Sidebar */,
+				11A58AEA96BF296DA80F79E6 /* Validation */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -216,6 +238,7 @@
 				F7D637675F00F7E7335EAA60 /* DiagramInteraction */,
 				0A6F24B4CD43AEA820A278C7 /* DiagramExport */,
 				7CC0E490E2C0AB357B1BB0A0 /* DiagramFoundation */,
+				3A07395E1650B9D5500A9217 /* DiagramValidation */,
 			);
 			productName = ArqidoDiagram;
 			productReference = C8938FD75E8AD92E2B7A36E4 /* ArqidoDiagram.app */;
@@ -279,6 +302,7 @@
 				ADA29FD3842F9982F88598B3 /* CanvasStatusModel.swift in Sources */,
 				22CC877A4DA7FBF7032917AF /* ContentView.swift in Sources */,
 				F71E181EBCD0A69E7118DCA8 /* CustomComponentStore.swift in Sources */,
+				AD018F6699D63F47DF717278 /* CustomRuleEditorView.swift in Sources */,
 				226500684F8D33309AB360A9 /* DiagramDocument.swift in Sources */,
 				C2CC9AC89FE2DD85ED536CB9 /* DiagramDocumentWindowController.swift in Sources */,
 				4070B241E7F75DFE01419BFC /* ExportCoordinator.swift in Sources */,
@@ -291,6 +315,9 @@
 				A6FC6CAD90F492114CA034EB /* SelectionModel.swift in Sources */,
 				6953EBE493AEA65F0DD8785A /* ShapeInsertionRequest.swift in Sources */,
 				AFE71D5A194BDCE67CD4CEC9 /* StatusBarView.swift in Sources */,
+				30849A93609B16BC8256A73E /* ValidationModel.swift in Sources */,
+				7431EAC770DD5B1B30AFA9F0 /* ValidationPanelView.swift in Sources */,
+				36240E13DBD671FAD8E19C8F /* ValidationStore.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -512,6 +539,10 @@
 		3293E56FA334AA210C33BE30 /* DiagramPersistence */ = {
 			isa = XCSwiftPackageProductDependency;
 			productName = DiagramPersistence;
+		};
+		3A07395E1650B9D5500A9217 /* DiagramValidation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DiagramValidation;
 		};
 		7CC0E490E2C0AB357B1BB0A0 /* DiagramFoundation */ = {
 			isa = XCSwiftPackageProductDependency;

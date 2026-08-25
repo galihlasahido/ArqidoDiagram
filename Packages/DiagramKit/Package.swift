@@ -14,7 +14,8 @@ let package = Package(
         .library(name: "DiagramRendering", targets: ["DiagramRendering"]),
         .library(name: "DiagramInteraction", targets: ["DiagramInteraction"]),
         .library(name: "DiagramExport", targets: ["DiagramExport"]),
-        .library(name: "DiagramLayout", targets: ["DiagramLayout"])
+        .library(name: "DiagramLayout", targets: ["DiagramLayout"]),
+        .library(name: "DiagramValidation", targets: ["DiagramValidation"])
     ],
     targets: [
         // Protocol-only seams for later phases (Layout, Validation, Import, AI)
@@ -27,8 +28,10 @@ let package = Package(
         // Undo/redo command protocol + concrete commands. No AppKit import.
         .target(name: "DiagramCommands", dependencies: ["DiagramModel"]),
 
-        // .diagram package read/write, schema migration.
-        .target(name: "DiagramPersistence", dependencies: ["DiagramModel"]),
+        // .diagram package read/write, schema migration, plus the two
+        // app-wide (not per-document) libraries: custom components and
+        // custom validation rules.
+        .target(name: "DiagramPersistence", dependencies: ["DiagramModel", "DiagramValidation"]),
 
         // Auto Layout: an abstraction over concrete layout algorithms
         // (Hierarchical/Tree/Grid/Force-Directed/Circular/Orthogonal), each
@@ -39,6 +42,12 @@ let package = Package(
         // concrete `DiagramModel.DiagramPage`, and DiagramFoundation sits
         // *below* DiagramModel in the dependency graph.
         .target(name: "DiagramLayout", dependencies: ["DiagramModel"]),
+
+        // Architecture Validation: a rules engine over DiagramPage. Same
+        // rationale as DiagramLayout for living outside DiagramFoundation
+        // (needs a concrete DiagramPage, which sits above DiagramFoundation
+        // in the dependency graph).
+        .target(name: "DiagramValidation", dependencies: ["DiagramModel"]),
 
         // NSView-based canvas, Core Graphics drawing, spatial index,
         // selection/move/resize/rotate interaction. AppKit, not SwiftUI.
@@ -59,10 +68,11 @@ let package = Package(
         .target(name: "DiagramExport", dependencies: ["DiagramModel", "DiagramRendering"]),
 
         .testTarget(name: "DiagramModelTests", dependencies: ["DiagramModel"]),
-        .testTarget(name: "DiagramPersistenceTests", dependencies: ["DiagramPersistence"]),
+        .testTarget(name: "DiagramPersistenceTests", dependencies: ["DiagramPersistence", "DiagramValidation"]),
         .testTarget(name: "DiagramCommandsTests", dependencies: ["DiagramCommands"]),
         .testTarget(name: "DiagramRenderingTests", dependencies: ["DiagramRendering"]),
         .testTarget(name: "DiagramExportTests", dependencies: ["DiagramExport"]),
-        .testTarget(name: "DiagramLayoutTests", dependencies: ["DiagramLayout"])
+        .testTarget(name: "DiagramLayoutTests", dependencies: ["DiagramLayout"]),
+        .testTarget(name: "DiagramValidationTests", dependencies: ["DiagramValidation"])
     ]
 )

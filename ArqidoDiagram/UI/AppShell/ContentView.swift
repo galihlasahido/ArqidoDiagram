@@ -9,6 +9,8 @@ struct ContentView: View {
     @StateObject private var inspectorBridge = InspectorBridge()
     @StateObject private var searchModel = SearchModel()
     @StateObject private var componentStore = CustomComponentStore()
+    @StateObject private var validationModel = ValidationModel()
+    @StateObject private var validationStore = ValidationStore()
     @State private var activePageID: PageID?
 
     var body: some View {
@@ -36,6 +38,12 @@ struct ContentView: View {
                         .padding(.top, 12)
                 }
             }
+            .overlay(alignment: .topTrailing) {
+                if validationModel.isPresented {
+                    ValidationPanelView(document: document, validationModel: validationModel, store: validationStore, bridge: inspectorBridge, activePageID: $activePageID)
+                        .padding(12)
+                }
+            }
         } detail: {
             InspectorView(document: document, selection: selection, bridge: inspectorBridge)
                 .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 360)
@@ -48,6 +56,9 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .toggleSearch)) { _ in
             searchModel.isPresented.toggle()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .toggleValidation)) { _ in
+            validationModel.isPresented.toggle()
         }
     }
 }

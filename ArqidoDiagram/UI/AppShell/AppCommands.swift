@@ -106,6 +106,13 @@ struct AppCommands: Commands {
             .keyboardShortcut("f", modifiers: .command)
         }
 
+        CommandMenu("Validation") {
+            Button("Show Validation") {
+                NotificationCenter.default.post(name: .toggleValidation, object: nil)
+            }
+            .keyboardShortcut("v", modifiers: [.command, .shift])
+        }
+
         CommandMenu("Arrange") {
             Button("Bring Forward") {
                 NSApp.sendAction(Selector(("bringForward:")), to: nil, from: nil)
