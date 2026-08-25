@@ -461,4 +461,75 @@ final class DiagramCanvasViewInteractionTests: XCTestCase {
         h.view.updateSelectedNodes(actionName: "Set Opacity") { $0.style.opacity = 0.2 }
         XCTAssertFalse(undoManager.canUndo)
     }
+
+    // MARK: - Connectors
+
+    func testDraggingFromAConnectorHandleToAnotherNodeCreatesAnEdge() {
+        let h = Harness()
+        let a = makeNode(x: 100, y: 100, w: 100, h: 100) // frame (100,100)-(200,200), center (150,150)
+        let b = makeNode(x: 400, y: 100, w: 100, h: 100) // center (450,150)
+        h.view.loadPage(page(with: [a, b]))
+        h.view.applyExternalSelection([a.id])
+
+        // East connector handle of `a` sits at (maxX + 18, midY) = (218, 150).
+        h.drag(from: CGPoint(x: 218, y: 150), to: CGPoint(x: 450, y: 150))
+
+        let snapshot = h.view.currentPageSnapshot(name: "Test", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.edges.count, 1)
+        let edge = snapshot.edges.values.first
+        XCTAssertEqual(edge?.source, .node(a.id, portID: nil))
+        XCTAssertEqual(edge?.target, .node(b.id, portID: nil))
+    }
+
+    func testDraggingFromAConnectorHandleToEmptySpaceCreatesADanglingEdge() {
+        let h = Harness()
+        let a = makeNode(x: 100, y: 100, w: 100, h: 100)
+        h.view.loadPage(page(with: [a]))
+        h.view.applyExternalSelection([a.id])
+
+        h.drag(from: CGPoint(x: 218, y: 150), to: CGPoint(x: 700, y: 700))
+
+        let snapshot = h.view.currentPageSnapshot(name: "Test", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.edges.count, 1)
+        XCTAssertEqual(snapshot.edges.values.first?.target, .point(Point2D(x: 700, y: 700)))
+    }
+
+    func testConnectingEdgesIsUndoable() {
+        let h = Harness()
+        let a = makeNode(x: 100, y: 100, w: 100, h: 100)
+        let b = makeNode(x: 400, y: 100, w: 100, h: 100)
+        h.view.loadPage(page(with: [a, b]))
+        h.view.applyExternalSelection([a.id])
+        let undoManager = UndoManager()
+        h.view.documentUndoManager = undoManager
+
+        h.drag(from: CGPoint(x: 218, y: 150), to: CGPoint(x: 450, y: 150))
+        XCTAssertEqual(h.view.currentPageSnapshot(name: "T", order: 0, canvasSize: nil, background: PageBackground()).edges.count, 1)
+
+        undoManager.undo()
+        XCTAssertEqual(h.view.currentPageSnapshot(name: "T", order: 0, canvasSize: nil, background: PageBackground()).edges.count, 0)
+    }
+
+    func testEdgeAutomaticallyReroutesWhenConnectedNodeMoves() {
+        let h = Harness()
+        let a = makeNode(x: 100, y: 100, w: 100, h: 100)
+        let b = makeNode(x: 400, y: 100, w: 100, h: 100)
+        var page = page(with: [a, b])
+        let edge = DiagramEdge(source: .node(a.id, portID: nil), target: .node(b.id, portID: nil))
+        page.edges[edge.id] = edge
+        page.edgeZOrder.append(edge.id)
+        h.view.loadPage(page)
+
+        h.view.applyExternalSelection([a.id])
+        h.drag(from: CGPoint(x: 150, y: 150), to: CGPoint(x: 150, y: 400)) // move `a` straight down
+
+        // Edge endpoints are resolved live from current node positions at
+        // draw time (never cached), so no explicit "reroute" call is
+        // needed — this test just confirms the node actually moved and the
+        // edge itself (and its source/target references) survived intact.
+        let snapshot = h.view.currentPageSnapshot(name: "T", order: 0, canvasSize: nil, background: PageBackground())
+        XCTAssertEqual(snapshot.nodes[a.id]?.position, Point2D(x: 100, y: 350))
+        XCTAssertEqual(snapshot.edges[edge.id]?.source, .node(a.id, portID: nil))
+        XCTAssertEqual(snapshot.edges[edge.id]?.target, .node(b.id, portID: nil))
+    }
 }

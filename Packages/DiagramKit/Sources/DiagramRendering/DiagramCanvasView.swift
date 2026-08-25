@@ -16,7 +16,10 @@ import DiagramCommands
 /// it, at Phase 1's feature set. Revisit once draw-connector (step 13)
 /// introduces a genuinely different interaction mode.
 ///
-/// TODO(later build-order steps): edges/connectors (step 13).
+/// TODO: edges aren't individually selectable/deletable yet (no edge
+/// hit-testing) — a reasonable Phase 1 scope cut, not an oversight; edges
+/// still fully support creation, automatic re-routing on node move, and
+/// undo (their `AddEdgesCommand`/`RemoveEdgesCommand` already exist).
 public final class DiagramCanvasView: NSView {
     public var viewport = CanvasViewport() {
         didSet {
@@ -493,6 +496,7 @@ public final class DiagramCanvasView: NSView {
         case move(startPositions: [NodeID: Point2D], startContentPoint: CGPoint)
         case resize(handle: ResizeHandle, startBounds: CGRect, startFrames: [NodeID: CGRect])
         case rotate(nodeID: NodeID, center: CGPoint, startAngle: CGFloat, startRotation: Double)
+        case connector(sourceNodeID: NodeID, currentContentPoint: CGPoint)
     }
 
     private var dragMode: DragMode = .none
@@ -511,7 +515,7 @@ public final class DiagramCanvasView: NSView {
     /// regardless of zoom, matching how the handles themselves are drawn at
     /// a fixed view-space size.
     private static let handleHitRadius: CGFloat = 6
-    private static let rotationHandleOffset: CGFloat = 26
+    private static let rotationHandleOffset: CGFloat = 34
 
     private func hitResizeHandle(atView viewPoint: CGPoint) -> (ResizeHandle, CGRect)? {
         guard let bounds = selectionBounds() else { return nil }
@@ -536,6 +540,47 @@ public final class DiagramCanvasView: NSView {
         return hypot(rotatedTop.x - viewPoint.x, rotatedTop.y - viewPoint.y) <= Self.handleHitRadius ? id : nil
     }
 
+    /// The 4 connector "ports" (N/S/E/W), shown only when exactly one node
+    /// is selected. Offset outward from the frame in *view* space (a fixed
+    /// pixel amount, unaffected by zoom) so they sit in their own hit-test
+    /// ring — between the resize handles (right on the boundary) and the
+    /// rotation handle (further out) — rather than overlapping either.
+    private static let connectorHandleOffset: CGFloat = 18
+
+    private func connectorHandleViewPoints(for node: DiagramNode) -> [CGPoint] {
+        let f = node.frame.applying(viewport.contentToViewTransform)
+        let o = Self.connectorHandleOffset
+        return [
+            CGPoint(x: f.midX, y: f.minY - o), CGPoint(x: f.midX, y: f.maxY + o),
+            CGPoint(x: f.minX - o, y: f.midY), CGPoint(x: f.maxX + o, y: f.midY)
+        ]
+    }
+
+    private func hitConnectorHandle(atView viewPoint: CGPoint) -> NodeID? {
+        guard selection.count == 1, let id = selection.first, let node = scene.nodes[id] else { return nil }
+        for handlePoint in connectorHandleViewPoints(for: node) {
+            if hypot(handlePoint.x - viewPoint.x, handlePoint.y - viewPoint.y) <= Self.handleHitRadius {
+                return id
+            }
+        }
+        return nil
+    }
+
+    private func drawConnectorHandles(for node: DiagramNode, in context: CGContext) {
+        context.saveGState()
+        context.setFillColor(NSColor.systemGreen.cgColor)
+        for p in connectorHandleViewPoints(for: node) {
+            context.fillEllipse(in: CGRect(x: p.x - 4, y: p.y - 4, width: 8, height: 8))
+        }
+        context.restoreGState()
+    }
+
+    private func pendingConnectorPreview() -> (CGPoint, CGPoint)? {
+        guard case .connector(let sourceID, let currentPoint) = dragMode, let sourceNode = scene.nodes[sourceID] else { return nil }
+        let source = EdgeGeometry.clippedPoint(from: sourceNode.frame.center, towards: currentPoint, in: sourceNode.frame)
+        return (source, currentPoint)
+    }
+
     public override func mouseDown(with event: NSEvent) {
         window?.makeFirstResponder(self)
         let viewPoint = convert(event.locationInWindow, from: nil)
@@ -544,6 +589,11 @@ public final class DiagramCanvasView: NSView {
 
         if event.clickCount >= 2, let hitID = topmostNode(at: contentPoint) {
             beginTextEditing(hitID)
+            return
+        }
+
+        if !isExtending, let sourceID = hitConnectorHandle(atView: viewPoint) {
+            dragMode = .connector(sourceNodeID: sourceID, currentContentPoint: contentPoint)
             return
         }
 
@@ -618,6 +668,9 @@ public final class DiagramCanvasView: NSView {
             let currentAngle = atan2(contentPoint.y - center.y, contentPoint.x - center.x)
             node.rotation = startRotation + Double(currentAngle - startAngle)
             scene.setNode(node)
+            needsDisplay = true
+        case .connector(let sourceID, _):
+            dragMode = .connector(sourceNodeID: sourceID, currentContentPoint: contentPoint)
             needsDisplay = true
         }
     }
@@ -700,6 +753,17 @@ public final class DiagramCanvasView: NSView {
             original.rotation = startRotation
             guard original != current else { return }
             commitLiveChange(before: [nodeID: original], after: [nodeID: current], actionName: "Rotate")
+
+        case .connector(let sourceID, let currentContentPoint):
+            defer { needsDisplay = true }
+            let target: EndpointRef
+            if let targetID = topmostNode(at: currentContentPoint), targetID != sourceID {
+                target = .node(targetID, portID: nil)
+            } else {
+                target = .point(Point2D(x: currentContentPoint.x, y: currentContentPoint.y))
+            }
+            let edge = DiagramEdge(source: .node(sourceID, portID: nil), target: target)
+            perform(AddEdgesCommand(edges: [edge]), actionName: "Connect")
         }
     }
 
@@ -724,11 +788,28 @@ public final class DiagramCanvasView: NSView {
         context.saveGState()
         context.concatenate(viewport.contentToViewTransform)
 
+        // Edges draw behind nodes — endpoints are clipped to the node
+        // boundary (EdgeGeometry.clippedPoint), so drawing nodes on top
+        // covers any line stub that would otherwise poke past the edge.
+        for edge in scene.edges.values.sorted(by: { $0.zIndex < $1.zIndex }) {
+            drawEdge(edge, in: context)
+        }
+
         let contentDirtyRect = viewport.viewToContent(rect: dirtyRect)
         let candidateIDs = spatialIndex.query(contentDirtyRect)
         let visibleNodes = candidateIDs.compactMap { scene.nodes[$0] }.sorted { $0.zIndex < $1.zIndex }
         for node in visibleNodes {
             draw(node, in: context)
+        }
+
+        if let connectorPreview = pendingConnectorPreview() {
+            context.saveGState()
+            context.setStrokeColor(NSColor.controlAccentColor.cgColor)
+            context.setLineWidth(1.5 / viewport.scale)
+            context.setLineDash(phase: 0, lengths: [6 / viewport.scale, 4 / viewport.scale])
+            context.addPath(EdgeGeometry.path(from: connectorPreview.0, to: connectorPreview.1, routing: .straight))
+            context.strokePath()
+            context.restoreGState()
         }
 
         context.restoreGState()
@@ -740,8 +821,53 @@ public final class DiagramCanvasView: NSView {
         if !selection.isEmpty {
             drawSelectionHighlights(in: context)
         }
+        if selection.count == 1, let id = selection.first, let node = scene.nodes[id] {
+            drawConnectorHandles(for: node, in: context)
+        }
         if let marqueeRect = marqueeViewRect {
             drawMarquee(marqueeRect, in: context)
+        }
+    }
+
+    private func drawEdge(_ edge: DiagramEdge, in context: CGContext) {
+        guard !edge.isHidden else { return }
+        // Resolve towards the other endpoint's node center (or its own
+        // point) as the "aim" reference for boundary-clipping.
+        let targetAim = aimPoint(for: edge.target)
+        let sourceAim = aimPoint(for: edge.source)
+        guard let source = EdgeGeometry.resolvedPoint(for: edge.source, nodes: scene.nodes, towards: targetAim),
+              let target = EdgeGeometry.resolvedPoint(for: edge.target, nodes: scene.nodes, towards: sourceAim) else { return }
+
+        let path = EdgeGeometry.path(from: source, to: target, routing: edge.routing)
+        context.saveGState()
+        context.setStrokeColor(NSColor(edge.style.strokeColor ?? .system(.systemGray)).cgColor)
+        context.setLineWidth(max(edge.style.strokeWidth, 0.5) / viewport.scale)
+        if edge.style.dash == .dashed {
+            context.setLineDash(phase: 0, lengths: [6 / viewport.scale, 4 / viewport.scale])
+        } else if edge.style.dash == .dotted {
+            context.setLineDash(phase: 0, lengths: [1.5 / viewport.scale, 3 / viewport.scale])
+        }
+        context.addPath(path)
+        context.strokePath()
+
+        let arrowColor = NSColor(edge.style.strokeColor ?? .system(.systemGray)).cgColor
+        if let startArrow = EdgeGeometry.arrowheadPath(from: target, tip: source, style: edge.style.startArrow, size: 9 / viewport.scale) {
+            context.setFillColor(arrowColor)
+            context.addPath(startArrow)
+            context.drawPath(using: edge.style.startArrow == .filled || edge.style.startArrow == .diamond || edge.style.startArrow == .circle ? .fillStroke : .stroke)
+        }
+        if let endArrow = EdgeGeometry.arrowheadPath(from: source, tip: target, style: edge.style.endArrow, size: 9 / viewport.scale) {
+            context.setFillColor(arrowColor)
+            context.addPath(endArrow)
+            context.drawPath(using: edge.style.endArrow == .filled || edge.style.endArrow == .diamond || edge.style.endArrow == .circle ? .fillStroke : .stroke)
+        }
+        context.restoreGState()
+    }
+
+    private func aimPoint(for endpoint: EndpointRef) -> CGPoint {
+        switch endpoint {
+        case .point(let p): return CGPoint(x: p.x, y: p.y)
+        case .node(let id, _): return scene.nodes[id]?.frame.center ?? .zero
         }
     }
 
