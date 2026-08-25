@@ -128,13 +128,20 @@ struct InspectorView: View {
         }
     }
 
+    @ViewBuilder
     private var metadataSection: some View {
         Section("Metadata") {
+            TextField("Type", text: metadataBinding(\.semanticType))
+                .help("A machine-readable architectural role — e.g. service, database, gateway, firewall, queue. Used by Architecture Validation rules.")
             TextField("Technology", text: metadataBinding(\.technology))
             TextField("Owner", text: metadataBinding(\.owner))
             TextField("Environment", text: metadataBinding(\.environment))
             TextField("Criticality", text: metadataBinding(\.criticality))
             TextField("Description", text: metadataBinding(\.notes))
+        }
+        Section("Tags") {
+            TextField("Tags", text: tagsBinding)
+                .help("Comma-separated tags.")
         }
     }
 
@@ -194,6 +201,16 @@ struct InspectorView: View {
             set: { newColor in
                 let ref = ColorRef(nsColor: NSColor(newColor))
                 bridge.canvasView?.updateSelectedNodes(actionName: "Set Color") { $0.style[keyPath: keyPath] = ref }
+            }
+        )
+    }
+
+    private var tagsBinding: Binding<String> {
+        Binding(
+            get: { selectedNodes.first?.metadata.tags.joined(separator: ", ") ?? "" },
+            set: { newValue in
+                let tags = newValue.split(separator: ",").map { $0.trimmingCharacters(in: .whitespaces) }.filter { !$0.isEmpty }
+                bridge.canvasView?.updateSelectedNodes(actionName: "Set Tags") { $0.metadata.tags = tags }
             }
         )
     }

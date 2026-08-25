@@ -44,6 +44,7 @@ struct SearchOverlayView: View {
 
     private func matchDetail(for node: DiagramNode, page: DiagramPage, query: String) -> String? {
         if let text = node.text?.string, text.lowercased().contains(query) { return text }
+        if let value = node.metadata.semanticType, value.lowercased().contains(query) { return "Type: \(value)" }
         if let value = node.metadata.technology, value.lowercased().contains(query) { return "Technology: \(value)" }
         if let value = node.metadata.owner, value.lowercased().contains(query) { return "Owner: \(value)" }
         if let value = node.metadata.environment, value.lowercased().contains(query) { return "Environment: \(value)" }
