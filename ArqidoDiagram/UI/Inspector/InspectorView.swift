@@ -14,7 +14,7 @@ struct InspectorView: View {
             Spacer()
         }
         .padding()
-        .frame(maxWidth: .infinity, alignment: .leading)
+        .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .topLeading)
         .navigationTitle("Inspector")
     }
 }

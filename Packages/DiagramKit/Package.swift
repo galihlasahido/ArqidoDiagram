@@ -44,6 +44,7 @@ let package = Package(
         .testTarget(name: "DiagramModelTests", dependencies: ["DiagramModel"]),
         .testTarget(name: "DiagramPersistenceTests", dependencies: ["DiagramPersistence"]),
         .testTarget(name: "DiagramCommandsTests", dependencies: ["DiagramCommands"]),
+        .testTarget(name: "DiagramRenderingTests", dependencies: ["DiagramRendering"]),
         .testTarget(name: "DiagramExportTests", dependencies: ["DiagramExport"])
     ]
 )

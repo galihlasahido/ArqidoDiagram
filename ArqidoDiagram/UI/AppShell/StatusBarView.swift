@@ -2,25 +2,28 @@ import SwiftUI
 
 /// The persistent bottom status strip every pane sits above, per the
 /// Visual/UI Style requirements — same role as Activity Monitor's own bottom
-/// status line. TODO: selection count / object count / zoom% become live
-/// once the canvas (step 4+) and selection model (step 7+) exist; shown as
-/// honest placeholders (not fabricated numbers) until then.
+/// status line. TODO: selection count becomes live once selection (step 7)
+/// exists; shown as an honest placeholder (not a fabricated number) until
+/// then. Zoom% and object count are already real.
 struct StatusBarView: View {
     @ObservedObject var document: DiagramDocument
+    @ObservedObject var canvasStatus: CanvasStatusModel
 
-    private var currentPageName: String {
-        document.model.pageOrder.first
-            .flatMap { document.model.pages[$0] }?
-            .name ?? "—"
+    private var currentPage: (name: String, objectCount: Int) {
+        guard let pageID = document.model.pageOrder.first, let page = document.model.pages[pageID] else {
+            return ("—", 0)
+        }
+        return (page.name, page.nodes.count)
     }
 
     var body: some View {
         HStack(spacing: 16) {
-            Text(currentPageName)
+            Text(currentPage.name)
             Spacer()
             Text("Selection: —")
-            Text("Objects: —")
-            Text("100%")
+            Text("Objects: \(currentPage.objectCount)")
+                .monospacedDigit()
+            Text("\(canvasStatus.zoomPercent)%")
                 .monospacedDigit()
         }
         .font(.caption)

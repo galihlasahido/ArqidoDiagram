@@ -15,6 +15,7 @@
 		313C3528020CF88B9388AD55 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD41EC125B8CA9E44C02822 /* InspectorView.swift */; };
 		8A5AE0E29173FCD425AC5DB3 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */; };
 		A62E6C07DD68BBC90F4BE9F7 /* DiagramInteraction in Frameworks */ = {isa = PBXBuildFile; productRef = F7D637675F00F7E7335EAA60 /* DiagramInteraction */; };
+		ADA29FD3842F9982F88598B3 /* CanvasStatusModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 3BFE5827FB1F7DB29704E326 /* CanvasStatusModel.swift */; };
 		ADB8273E3D5567ED1946BAAC /* DiagramModel in Frameworks */ = {isa = PBXBuildFile; productRef = 317559AC58264CCDDC9699B6 /* DiagramModel */; };
 		AF4768870B62DF81B5C0961E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B039D17C71B630291DB01003 /* Assets.xcassets */; };
 		AFE71D5A194BDCE67CD4CEC9 /* StatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488320F0290775EF9637D887 /* StatusBarView.swift */; };
@@ -30,6 +31,7 @@
 		0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarView.swift; sourceTree = "<group>"; };
 		219837F48E9DD01413C6FBDC /* ArqidoDiagramApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArqidoDiagramApp.swift; sourceTree = "<group>"; };
 		25064BA4FC3F3E47A7952A5F /* AppCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCommands.swift; sourceTree = "<group>"; };
+		3BFE5827FB1F7DB29704E326 /* CanvasStatusModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasStatusModel.swift; sourceTree = "<group>"; };
 		488320F0290775EF9637D887 /* StatusBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarView.swift; sourceTree = "<group>"; };
 		4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasHostView.swift; sourceTree = "<group>"; };
 		4FD41EC125B8CA9E44C02822 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
@@ -105,6 +107,7 @@
 			isa = PBXGroup;
 			children = (
 				4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */,
+				3BFE5827FB1F7DB29704E326 /* CanvasStatusModel.swift */,
 			);
 			path = Canvas;
 			sourceTree = "<group>";
@@ -233,6 +236,7 @@
 				E0D7FD9B533B97D6C21F948B /* AppCommands.swift in Sources */,
 				F1EE3F26254786B37FAC7826 /* ArqidoDiagramApp.swift in Sources */,
 				F3EF981657B636BA0B2A4E32 /* CanvasHostView.swift in Sources */,
+				ADA29FD3842F9982F88598B3 /* CanvasStatusModel.swift in Sources */,
 				22CC877A4DA7FBF7032917AF /* ContentView.swift in Sources */,
 				226500684F8D33309AB360A9 /* DiagramDocument.swift in Sources */,
 				C2CC9AC89FE2DD85ED536CB9 /* DiagramDocumentWindowController.swift in Sources */,
