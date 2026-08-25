@@ -1,0 +1,53 @@
+name: ArqidoDiagram
+options:
+  bundleIdPrefix: com.arqido
+  deploymentTarget:
+    macOS: "14.0"
+  createIntermediateGroups: true
+
+packages:
+  DiagramKit:
+    path: Packages/DiagramKit
+
+targets:
+  ArqidoDiagram:
+    type: application
+    platform: macOS
+    deploymentTarget: "14.0"
+    sources:
+      - path: ArqidoDiagram
+        excludes:
+          - Info.plist
+          - ArqidoDiagram.entitlements
+    settings:
+      base:
+        PRODUCT_BUNDLE_IDENTIFIER: com.arqido.ArqidoDiagram
+        PRODUCT_NAME: ArqidoDiagram
+        MARKETING_VERSION: "0.1.0"
+        CURRENT_PROJECT_VERSION: "1"
+        GENERATE_INFOPLIST_FILE: YES
+        INFOPLIST_FILE: ArqidoDiagram/Info.plist
+        INFOPLIST_KEY_NSHumanReadableCopyright: ""
+        INFOPLIST_KEY_LSApplicationCategoryType: public.app-category.developer-tools
+        CODE_SIGN_ENTITLEMENTS: ArqidoDiagram/ArqidoDiagram.entitlements
+        CODE_SIGN_STYLE: Automatic
+        SWIFT_VERSION: "5.10"
+        MACOSX_DEPLOYMENT_TARGET: "14.0"
+        ASSETCATALOG_COMPILER_APPICON_NAME: AppIcon
+        ENABLE_HARDENED_RUNTIME: YES
+        SWIFT_STRICT_CONCURRENCY: minimal
+    dependencies:
+      - package: DiagramKit
+        product: DiagramModel
+      - package: DiagramKit
+        product: DiagramPersistence
+      - package: DiagramKit
+        product: DiagramCommands
+      - package: DiagramKit
+        product: DiagramRendering
+      - package: DiagramKit
+        product: DiagramInteraction
+      - package: DiagramKit
+        product: DiagramExport
+      - package: DiagramKit
+        product: DiagramFoundation

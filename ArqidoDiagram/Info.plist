@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>CFBundleDocumentTypes</key>
+	<array>
+		<dict>
+			<key>CFBundleTypeName</key>
+			<string>ArqidoDiagram Document</string>
+			<key>CFBundleTypeRole</key>
+			<string>Editor</string>
+			<key>LSItemContentTypes</key>
+			<array>
+				<string>com.arqido.diagram</string>
+			</array>
+			<key>LSHandlerRank</key>
+			<string>Owner</string>
+			<key>NSDocumentClass</key>
+			<string>DiagramDocument</string>
+		</dict>
+	</array>
+	<key>UTExportedTypeDeclarations</key>
+	<array>
+		<dict>
+			<key>UTTypeIdentifier</key>
+			<string>com.arqido.diagram</string>
+			<key>UTTypeDescription</key>
+			<string>ArqidoDiagram Document</string>
+			<key>UTTypeConformsTo</key>
+			<array>
+				<string>com.apple.package</string>
+				<string>public.composite-content</string>
+			</array>
+			<key>UTTypeTagSpecification</key>
+			<dict>
+				<key>public.filename-extension</key>
+				<array>
+					<string>diagram</string>
+				</array>
+			</dict>
+		</dict>
+	</array>
+	<key>NSSupportsAutosaveInPlace</key>
+	<true/>
+</dict>
+</plist>

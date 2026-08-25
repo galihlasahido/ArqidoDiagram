@@ -1,0 +1,483 @@
+// !$*UTF8*$!
+{
+	archiveVersion = 1;
+	classes = {
+	};
+	objectVersion = 77;
+	objects = {
+
+/* Begin PBXBuildFile section */
+		034C7843AF910B5A451DBF14 /* DiagramFoundation in Frameworks */ = {isa = PBXBuildFile; productRef = 7CC0E490E2C0AB357B1BB0A0 /* DiagramFoundation */; };
+		1A39CB3C0FB98B0038D71C3B /* DiagramPersistence in Frameworks */ = {isa = PBXBuildFile; productRef = 3293E56FA334AA210C33BE30 /* DiagramPersistence */; };
+		1CF5EAB53DB7B9C004A8B93A /* DiagramRendering in Frameworks */ = {isa = PBXBuildFile; productRef = ECA3272AD885FA98784B0932 /* DiagramRendering */; };
+		226500684F8D33309AB360A9 /* DiagramDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 664420670A4167E8F7B57114 /* DiagramDocument.swift */; };
+		22CC877A4DA7FBF7032917AF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC26882DD8172FD1012F325 /* ContentView.swift */; };
+		313C3528020CF88B9388AD55 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD41EC125B8CA9E44C02822 /* InspectorView.swift */; };
+		8A5AE0E29173FCD425AC5DB3 /* LibrarySidebarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */; };
+		A62E6C07DD68BBC90F4BE9F7 /* DiagramInteraction in Frameworks */ = {isa = PBXBuildFile; productRef = F7D637675F00F7E7335EAA60 /* DiagramInteraction */; };
+		ADB8273E3D5567ED1946BAAC /* DiagramModel in Frameworks */ = {isa = PBXBuildFile; productRef = 317559AC58264CCDDC9699B6 /* DiagramModel */; };
+		AF4768870B62DF81B5C0961E /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = B039D17C71B630291DB01003 /* Assets.xcassets */; };
+		AFE71D5A194BDCE67CD4CEC9 /* StatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488320F0290775EF9637D887 /* StatusBarView.swift */; };
+		B056DA583012F4ECD70AF47E /* DiagramExport in Frameworks */ = {isa = PBXBuildFile; productRef = 0A6F24B4CD43AEA820A278C7 /* DiagramExport */; };
+		BD103EF5017C1E4D9B44ED6D /* DiagramCommands in Frameworks */ = {isa = PBXBuildFile; productRef = A188D553E903E92AC790DEF6 /* DiagramCommands */; };
+		C2CC9AC89FE2DD85ED536CB9 /* DiagramDocumentWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944039CEA4BF2D86958B0CF8 /* DiagramDocumentWindowController.swift */; };
+		E0D7FD9B533B97D6C21F948B /* AppCommands.swift in Sources */ = {isa = PBXBuildFile; fileRef = 25064BA4FC3F3E47A7952A5F /* AppCommands.swift */; };
+		F1EE3F26254786B37FAC7826 /* ArqidoDiagramApp.swift in Sources */ = {isa = PBXBuildFile; fileRef = 219837F48E9DD01413C6FBDC /* ArqidoDiagramApp.swift */; };
+		F3EF981657B636BA0B2A4E32 /* CanvasHostView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */; };
+/* End PBXBuildFile section */
+
+/* Begin PBXFileReference section */
+		0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarView.swift; sourceTree = "<group>"; };
+		219837F48E9DD01413C6FBDC /* ArqidoDiagramApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArqidoDiagramApp.swift; sourceTree = "<group>"; };
+		25064BA4FC3F3E47A7952A5F /* AppCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCommands.swift; sourceTree = "<group>"; };
+		488320F0290775EF9637D887 /* StatusBarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = StatusBarView.swift; sourceTree = "<group>"; };
+		4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CanvasHostView.swift; sourceTree = "<group>"; };
+		4FD41EC125B8CA9E44C02822 /* InspectorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = InspectorView.swift; sourceTree = "<group>"; };
+		664420670A4167E8F7B57114 /* DiagramDocument.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocument.swift; sourceTree = "<group>"; };
+		944039CEA4BF2D86958B0CF8 /* DiagramDocumentWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocumentWindowController.swift; sourceTree = "<group>"; };
+		AC0AC164C4B632D1A80B8B69 /* DiagramKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DiagramKit; path = Packages/DiagramKit; sourceTree = SOURCE_ROOT; };
+		B039D17C71B630291DB01003 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
+		C8938FD75E8AD92E2B7A36E4 /* ArqidoDiagram.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ArqidoDiagram.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		CBC26882DD8172FD1012F325 /* ContentView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ContentView.swift; sourceTree = "<group>"; };
+/* End PBXFileReference section */
+
+/* Begin PBXFrameworksBuildPhase section */
+		85980A2612F0E94897ED6824 /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				ADB8273E3D5567ED1946BAAC /* DiagramModel in Frameworks */,
+				1A39CB3C0FB98B0038D71C3B /* DiagramPersistence in Frameworks */,
+				BD103EF5017C1E4D9B44ED6D /* DiagramCommands in Frameworks */,
+				1CF5EAB53DB7B9C004A8B93A /* DiagramRendering in Frameworks */,
+				A62E6C07DD68BBC90F4BE9F7 /* DiagramInteraction in Frameworks */,
+				B056DA583012F4ECD70AF47E /* DiagramExport in Frameworks */,
+				034C7843AF910B5A451DBF14 /* DiagramFoundation in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXFrameworksBuildPhase section */
+
+/* Begin PBXGroup section */
+		0D43923587DF576E3DE1DA50 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				C8938FD75E8AD92E2B7A36E4 /* ArqidoDiagram.app */,
+			);
+			name = Products;
+			sourceTree = "<group>";
+		};
+		106098C530E0015278B96A90 /* AppShell */ = {
+			isa = PBXGroup;
+			children = (
+				25064BA4FC3F3E47A7952A5F /* AppCommands.swift */,
+				CBC26882DD8172FD1012F325 /* ContentView.swift */,
+				488320F0290775EF9637D887 /* StatusBarView.swift */,
+			);
+			path = AppShell;
+			sourceTree = "<group>";
+		};
+		29509DA53928E9C7F8DEE861 /* Inspector */ = {
+			isa = PBXGroup;
+			children = (
+				4FD41EC125B8CA9E44C02822 /* InspectorView.swift */,
+			);
+			path = Inspector;
+			sourceTree = "<group>";
+		};
+		47C1C81FECA6B1A3C387B3B0 /* Sidebar */ = {
+			isa = PBXGroup;
+			children = (
+				0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */,
+			);
+			path = Sidebar;
+			sourceTree = "<group>";
+		};
+		6ECDD9660FBB83DCA4C06336 /* Packages */ = {
+			isa = PBXGroup;
+			children = (
+				AC0AC164C4B632D1A80B8B69 /* DiagramKit */,
+			);
+			path = Packages;
+			sourceTree = "<group>";
+		};
+		8CDEBF7EFAA53772E5D0C547 /* Canvas */ = {
+			isa = PBXGroup;
+			children = (
+				4D52D4E9CDE772CA2BE6E689 /* CanvasHostView.swift */,
+			);
+			path = Canvas;
+			sourceTree = "<group>";
+		};
+		9CE3AECAE1B7255E96743362 /* UI */ = {
+			isa = PBXGroup;
+			children = (
+				106098C530E0015278B96A90 /* AppShell */,
+				8CDEBF7EFAA53772E5D0C547 /* Canvas */,
+				29509DA53928E9C7F8DEE861 /* Inspector */,
+				47C1C81FECA6B1A3C387B3B0 /* Sidebar */,
+			);
+			path = UI;
+			sourceTree = "<group>";
+		};
+		E1C3EB59D4EBAC42F4EB3BB4 = {
+			isa = PBXGroup;
+			children = (
+				F3147B961989AB40CE3A99FE /* ArqidoDiagram */,
+				6ECDD9660FBB83DCA4C06336 /* Packages */,
+				0D43923587DF576E3DE1DA50 /* Products */,
+			);
+			sourceTree = "<group>";
+		};
+		F3147B961989AB40CE3A99FE /* ArqidoDiagram */ = {
+			isa = PBXGroup;
+			children = (
+				219837F48E9DD01413C6FBDC /* ArqidoDiagramApp.swift */,
+				B039D17C71B630291DB01003 /* Assets.xcassets */,
+				F6CB90AAF43E40065CC255F0 /* Document */,
+				9CE3AECAE1B7255E96743362 /* UI */,
+			);
+			path = ArqidoDiagram;
+			sourceTree = "<group>";
+		};
+		F6CB90AAF43E40065CC255F0 /* Document */ = {
+			isa = PBXGroup;
+			children = (
+				664420670A4167E8F7B57114 /* DiagramDocument.swift */,
+				944039CEA4BF2D86958B0CF8 /* DiagramDocumentWindowController.swift */,
+			);
+			path = Document;
+			sourceTree = "<group>";
+		};
+/* End PBXGroup section */
+
+/* Begin PBXNativeTarget section */
+		422A5308628391BA56BD663E /* ArqidoDiagram */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = B24109F8A4D2F1C9D553DDCC /* Build configuration list for PBXNativeTarget "ArqidoDiagram" */;
+			buildPhases = (
+				5EDF93963E1418AFA43CF7D8 /* Sources */,
+				F2628CA72D73B7E3D7EFC607 /* Resources */,
+				85980A2612F0E94897ED6824 /* Frameworks */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = ArqidoDiagram;
+			packageProductDependencies = (
+				317559AC58264CCDDC9699B6 /* DiagramModel */,
+				3293E56FA334AA210C33BE30 /* DiagramPersistence */,
+				A188D553E903E92AC790DEF6 /* DiagramCommands */,
+				ECA3272AD885FA98784B0932 /* DiagramRendering */,
+				F7D637675F00F7E7335EAA60 /* DiagramInteraction */,
+				0A6F24B4CD43AEA820A278C7 /* DiagramExport */,
+				7CC0E490E2C0AB357B1BB0A0 /* DiagramFoundation */,
+			);
+			productName = ArqidoDiagram;
+			productReference = C8938FD75E8AD92E2B7A36E4 /* ArqidoDiagram.app */;
+			productType = "com.apple.product-type.application";
+		};
+/* End PBXNativeTarget section */
+
+/* Begin PBXProject section */
+		3DB84EED8DA3A5EE88A6AA32 /* Project object */ = {
+			isa = PBXProject;
+			attributes = {
+				BuildIndependentTargetsInParallel = YES;
+				LastUpgradeCheck = 1430;
+				TargetAttributes = {
+					422A5308628391BA56BD663E = {
+						ProvisioningStyle = Automatic;
+					};
+				};
+			};
+			buildConfigurationList = 1EEA368F11AFDBACA518CE6F /* Build configuration list for PBXProject "ArqidoDiagram" */;
+			developmentRegion = en;
+			hasScannedForEncodings = 0;
+			knownRegions = (
+				Base,
+				en,
+			);
+			mainGroup = E1C3EB59D4EBAC42F4EB3BB4;
+			minimizedProjectReferenceProxies = 1;
+			packageReferences = (
+				E6EA69353F4E9D0D1D46F7D6 /* XCLocalSwiftPackageReference "Packages/DiagramKit" */,
+			);
+			preferredProjectObjectVersion = 77;
+			productRefGroup = 0D43923587DF576E3DE1DA50 /* Products */;
+			projectDirPath = "";
+			projectRoot = "";
+			targets = (
+				422A5308628391BA56BD663E /* ArqidoDiagram */,
+			);
+		};
+/* End PBXProject section */
+
+/* Begin PBXResourcesBuildPhase section */
+		F2628CA72D73B7E3D7EFC607 /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				AF4768870B62DF81B5C0961E /* Assets.xcassets in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXResourcesBuildPhase section */
+
+/* Begin PBXSourcesBuildPhase section */
+		5EDF93963E1418AFA43CF7D8 /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E0D7FD9B533B97D6C21F948B /* AppCommands.swift in Sources */,
+				F1EE3F26254786B37FAC7826 /* ArqidoDiagramApp.swift in Sources */,
+				F3EF981657B636BA0B2A4E32 /* CanvasHostView.swift in Sources */,
+				22CC877A4DA7FBF7032917AF /* ContentView.swift in Sources */,
+				226500684F8D33309AB360A9 /* DiagramDocument.swift in Sources */,
+				C2CC9AC89FE2DD85ED536CB9 /* DiagramDocumentWindowController.swift in Sources */,
+				313C3528020CF88B9388AD55 /* InspectorView.swift in Sources */,
+				8A5AE0E29173FCD425AC5DB3 /* LibrarySidebarView.swift in Sources */,
+				AFE71D5A194BDCE67CD4CEC9 /* StatusBarView.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+/* End PBXSourcesBuildPhase section */
+
+/* Begin XCBuildConfiguration section */
+		318E083D5B89E65CA9E7168D /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = dwarf;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				ENABLE_TESTABILITY = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_DYNAMIC_NO_PIC = NO;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_OPTIMIZATION_LEVEL = 0;
+				GCC_PREPROCESSOR_DEFINITIONS = (
+					"$(inherited)",
+					"DEBUG=1",
+				);
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				ONLY_ACTIVE_ARCH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Debug;
+		};
+		7EA5C0AF2D0646978B3F835A /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ALWAYS_SEARCH_USER_PATHS = NO;
+				CLANG_ANALYZER_NONNULL = YES;
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_CXX_LIBRARY = "libc++";
+				CLANG_ENABLE_MODULES = YES;
+				CLANG_ENABLE_OBJC_ARC = YES;
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_BLOCK_CAPTURE_AUTORELEASING = YES;
+				CLANG_WARN_BOOL_CONVERSION = YES;
+				CLANG_WARN_COMMA = YES;
+				CLANG_WARN_CONSTANT_CONVERSION = YES;
+				CLANG_WARN_DEPRECATED_OBJC_IMPLEMENTATIONS = YES;
+				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_EMPTY_BODY = YES;
+				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
+				CLANG_WARN_INT_CONVERSION = YES;
+				CLANG_WARN_NON_LITERAL_NULL_CONVERSION = YES;
+				CLANG_WARN_OBJC_IMPLICIT_RETAIN_SELF = YES;
+				CLANG_WARN_OBJC_LITERAL_CONVERSION = YES;
+				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_QUOTED_INCLUDE_IN_FRAMEWORK_HEADER = YES;
+				CLANG_WARN_RANGE_LOOP_ANALYSIS = YES;
+				CLANG_WARN_STRICT_PROTOTYPES = YES;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CLANG_WARN_UNREACHABLE_CODE = YES;
+				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
+				COPY_PHASE_STRIP = NO;
+				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
+				ENABLE_NS_ASSERTIONS = NO;
+				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				GCC_NO_COMMON_BLOCKS = YES;
+				GCC_WARN_64_TO_32_BIT_CONVERSION = YES;
+				GCC_WARN_ABOUT_RETURN_TYPE = YES_ERROR;
+				GCC_WARN_UNDECLARED_SELECTOR = YES;
+				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
+				GCC_WARN_UNUSED_FUNCTION = YES;
+				GCC_WARN_UNUSED_VARIABLE = YES;
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MTL_ENABLE_DEBUG_INFO = NO;
+				MTL_FAST_MATH = YES;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SDKROOT = macosx;
+				SWIFT_COMPILATION_MODE = wholemodule;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+			};
+			name = Release;
+		};
+		C5145194D85C79779E39C300 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = ArqidoDiagram/ArqidoDiagram.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ArqidoDiagram/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.arqido.ArqidoDiagram;
+				PRODUCT_NAME = ArqidoDiagram;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.10;
+			};
+			name = Release;
+		};
+		EBD6BE9AA7A9672BB7925371 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_ENTITLEMENTS = ArqidoDiagram/ArqidoDiagram.entitlements;
+				CODE_SIGN_STYLE = Automatic;
+				COMBINE_HIDPI_IMAGES = YES;
+				CURRENT_PROJECT_VERSION = 1;
+				ENABLE_HARDENED_RUNTIME = YES;
+				GENERATE_INFOPLIST_FILE = YES;
+				INFOPLIST_FILE = ArqidoDiagram/Info.plist;
+				INFOPLIST_KEY_LSApplicationCategoryType = "public.app-category.developer-tools";
+				INFOPLIST_KEY_NSHumanReadableCopyright = "";
+				LD_RUNPATH_SEARCH_PATHS = (
+					"$(inherited)",
+					"@executable_path/../Frameworks",
+				);
+				MACOSX_DEPLOYMENT_TARGET = 14.0;
+				MARKETING_VERSION = 0.1.0;
+				PRODUCT_BUNDLE_IDENTIFIER = com.arqido.ArqidoDiagram;
+				PRODUCT_NAME = ArqidoDiagram;
+				SDKROOT = macosx;
+				SWIFT_STRICT_CONCURRENCY = minimal;
+				SWIFT_VERSION = 5.10;
+			};
+			name = Debug;
+		};
+/* End XCBuildConfiguration section */
+
+/* Begin XCConfigurationList section */
+		1EEA368F11AFDBACA518CE6F /* Build configuration list for PBXProject "ArqidoDiagram" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				318E083D5B89E65CA9E7168D /* Debug */,
+				7EA5C0AF2D0646978B3F835A /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+		B24109F8A4D2F1C9D553DDCC /* Build configuration list for PBXNativeTarget "ArqidoDiagram" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				EBD6BE9AA7A9672BB7925371 /* Debug */,
+				C5145194D85C79779E39C300 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Debug;
+		};
+/* End XCConfigurationList section */
+
+/* Begin XCLocalSwiftPackageReference section */
+		E6EA69353F4E9D0D1D46F7D6 /* XCLocalSwiftPackageReference "Packages/DiagramKit" */ = {
+			isa = XCLocalSwiftPackageReference;
+			relativePath = Packages/DiagramKit;
+		};
+/* End XCLocalSwiftPackageReference section */
+
+/* Begin XCSwiftPackageProductDependency section */
+		0A6F24B4CD43AEA820A278C7 /* DiagramExport */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DiagramExport;
+		};
+		317559AC58264CCDDC9699B6 /* DiagramModel */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DiagramModel;
+		};
+		3293E56FA334AA210C33BE30 /* DiagramPersistence */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DiagramPersistence;
+		};
+		7CC0E490E2C0AB357B1BB0A0 /* DiagramFoundation */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DiagramFoundation;
+		};
+		A188D553E903E92AC790DEF6 /* DiagramCommands */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DiagramCommands;
+		};
+		ECA3272AD885FA98784B0932 /* DiagramRendering */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DiagramRendering;
+		};
+		F7D637675F00F7E7335EAA60 /* DiagramInteraction */ = {
+			isa = XCSwiftPackageProductDependency;
+			productName = DiagramInteraction;
+		};
+/* End XCSwiftPackageProductDependency section */
+	};
+	rootObject = 3DB84EED8DA3A5EE88A6AA32 /* Project object */;
+}

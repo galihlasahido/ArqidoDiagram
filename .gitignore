@@ -1,0 +1,27 @@
+# Xcode
+build/
+DerivedData/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+xcuserdata/
+*.moved-aside
+*.xccheckout
+*.xcscmblueprint
+
+# XcodeGen-generated project (regenerate via `xcodegen generate` from project.yml)
+# Kept tracked for now so the repo is buildable without XcodeGen installed;
+# remove this comment block and add "ArqidoDiagram.xcodeproj/" here instead
+# if the team later decides to generate-on-checkout.
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Packages/DiagramKit/.build/
+
+# macOS
+.DS_Store
+
+# Simulator/device logs, crash reports
+*.crash
