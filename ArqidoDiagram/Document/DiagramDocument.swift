@@ -26,6 +26,10 @@ final class DiagramDocument: NSDocument, ObservableObject {
     private var password: String?
     var isEncrypted: Bool { password != nil }
 
+    /// Spec §VERSIONING: "Snapshot, Restore, Compare, Version notes".
+    /// Newest first, since that's how `VersionHistoryPanelView` lists them.
+    @Published private(set) var versions: [DocumentVersion] = []
+
     override init() {
         model = .blank(at: Date())
         super.init()
@@ -126,7 +130,7 @@ final class DiagramDocument: NSDocument, ObservableObject {
         // never touches the previously-saved on-disk package, and
         // NSDocument's standard package-write path (temp file + atomic
         // rename) handles on-disk atomicity on top of that.
-        return try PackageWriter.fileWrapper(for: model, password: password)
+        return try PackageWriter.fileWrapper(for: model, password: password, versions: versions)
     }
 
     /// Runs on the main thread (the default for `canConcurrentlyReadDocuments
@@ -137,6 +141,7 @@ final class DiagramDocument: NSDocument, ObservableObject {
         let peek = try PackageReader.peekManifest(from: fileWrapper)
         guard peek.isEncrypted else {
             model = try PackageReader.documentModel(from: fileWrapper)
+            versions = (try? PackageReader.versions(from: fileWrapper)) ?? []
             return
         }
 
@@ -144,6 +149,7 @@ final class DiagramDocument: NSDocument, ObservableObject {
            let decoded = try? PackageReader.documentModel(from: fileWrapper, password: savedPassword) {
             model = decoded
             password = savedPassword
+            versions = (try? PackageReader.versions(from: fileWrapper, password: savedPassword)) ?? []
             return
         }
 
@@ -154,6 +160,7 @@ final class DiagramDocument: NSDocument, ObservableObject {
             do {
                 model = try PackageReader.documentModel(from: fileWrapper, password: entered)
                 password = entered
+                versions = (try? PackageReader.versions(from: fileWrapper, password: entered)) ?? []
                 return
             } catch PackageReadError.incorrectPassword {
                 continue
@@ -167,6 +174,49 @@ final class DiagramDocument: NSDocument, ObservableObject {
         for saveOperation: NSDocument.SaveOperationType
     ) -> Bool {
         true
+    }
+
+    // MARK: - Versioning
+    //
+    // Spec §VERSIONING: "Snapshot, Restore, Compare, Version notes".
+    // Snapshot/Restore go through `undoManager` like page management above,
+    // so restoring a version is itself undoable; Compare
+    // (`VersionComparator.diff`) is a pure read and needs no Command.
+
+    @objc func saveVersionSnapshot(_ sender: Any?) {
+        let alert = NSAlert()
+        alert.messageText = "Save Version Snapshot"
+        alert.informativeText = "Describe what's in this snapshot so you can find it again later."
+        alert.addButton(withTitle: "Save Snapshot")
+        alert.addButton(withTitle: "Cancel")
+
+        let noteField = NSTextField(frame: NSRect(x: 0, y: 0, width: 280, height: 24))
+        noteField.placeholderString = "e.g. \"Before splitting the payments service\""
+        alert.accessoryView = noteField
+        alert.window.initialFirstResponder = noteField
+
+        guard alert.runModal() == .alertFirstButtonReturn else { return }
+        let version = DocumentVersion(note: noteField.stringValue, snapshot: model)
+        insertVersion(version)
+    }
+
+    func restoreVersion(_ version: DocumentVersion) {
+        let previousModel = model
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.model = previousModel
+        }
+        undoManager?.setActionName("Restore Version")
+        model = version.snapshot
+        model.modifiedAt = Date()
+    }
+
+    private func insertVersion(_ version: DocumentVersion) {
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.versions.removeAll { $0.id == version.id }
+        }
+        undoManager?.setActionName("Save Version Snapshot")
+        versions.insert(version, at: 0)
+        updateChangeCount(.changeDone)
     }
 
     // MARK: - Document encryption

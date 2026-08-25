@@ -56,6 +56,18 @@ struct AppCommands: Commands {
             Button("Remove Document Password…") {
                 NSApp.sendAction(Selector(("removeDocumentPassword:")), to: nil, from: nil)
             }
+
+            Divider()
+
+            Button("Save Version Snapshot…") {
+                NSApp.sendAction(Selector(("saveVersionSnapshot:")), to: nil, from: nil)
+            }
+            .keyboardShortcut("s", modifiers: [.command, .option])
+
+            Button("Show Version History") {
+                NotificationCenter.default.post(name: .toggleVersionHistory, object: nil)
+            }
+            .keyboardShortcut("h", modifiers: [.command, .shift])
         }
 
         CommandGroup(replacing: .undoRedo) {

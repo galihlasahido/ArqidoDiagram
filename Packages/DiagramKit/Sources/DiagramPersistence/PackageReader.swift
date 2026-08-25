@@ -51,25 +51,10 @@ public enum PackageReader {
         }
         let manifest = try MigrationRegistry.migrate(try decoder.decode(ManifestV1.self, from: manifestData))
 
-        let envelope: DocumentEncryption.Envelope?
-        if let envelopeData = children["encryption.json"]?.regularFileContents {
-            envelope = try decoder.decode(DocumentEncryption.Envelope.self, from: envelopeData)
-        } else {
-            envelope = nil
-        }
-        if envelope != nil, password == nil {
-            throw PackageReadError.encryptionPasswordRequired
-        }
+        let envelope = try readEnvelope(children: children, password: password, decoder: decoder)
 
         func decoded<T: Decodable>(_ type: T.Type, from data: Data) throws -> T {
-            guard let envelope, let password else { return try decoder.decode(type, from: data) }
-            let plaintext: Data
-            do {
-                plaintext = try DocumentEncryption.decrypt(data, password: password, envelope: envelope)
-            } catch {
-                throw PackageReadError.incorrectPassword
-            }
-            return try decoder.decode(type, from: plaintext)
+            try decode(type, from: data, envelope: envelope, password: password, decoder: decoder)
         }
 
         guard let infoData = children["document.json"]?.regularFileContents else {
@@ -98,5 +83,42 @@ public enum PackageReader {
             pages: pages,
             pageOrder: manifest.pageOrder
         )
+    }
+
+    /// Reads back every saved `DocumentVersion` (see `PackageWriter`'s
+    /// `versions:` parameter). Order is not guaranteed by the file system,
+    /// so callers should sort by `createdAt` themselves if display order
+    /// matters (`DiagramDocument` does, newest-first).
+    public static func versions(from wrapper: FileWrapper, password: String? = nil) throws -> [DocumentVersion] {
+        guard wrapper.isDirectory, let children = wrapper.fileWrappers else {
+            throw PackageReadError.notAPackage
+        }
+        let decoder = JSONDecoder()
+        decoder.dateDecodingStrategy = .iso8601
+        let envelope = try readEnvelope(children: children, password: password, decoder: decoder)
+
+        guard let versionWrappers = children["versions"]?.fileWrappers else { return [] }
+        return try versionWrappers.values.compactMap { fileWrapper in
+            guard let data = fileWrapper.regularFileContents else { return nil }
+            return try decode(DocumentVersion.self, from: data, envelope: envelope, password: password, decoder: decoder)
+        }
+    }
+
+    private static func readEnvelope(children: [String: FileWrapper], password: String?, decoder: JSONDecoder) throws -> DocumentEncryption.Envelope? {
+        guard let envelopeData = children["encryption.json"]?.regularFileContents else { return nil }
+        let envelope = try decoder.decode(DocumentEncryption.Envelope.self, from: envelopeData)
+        if password == nil { throw PackageReadError.encryptionPasswordRequired }
+        return envelope
+    }
+
+    private static func decode<T: Decodable>(_ type: T.Type, from data: Data, envelope: DocumentEncryption.Envelope?, password: String?, decoder: JSONDecoder) throws -> T {
+        guard let envelope, let password else { return try decoder.decode(type, from: data) }
+        let plaintext: Data
+        do {
+            plaintext = try DocumentEncryption.decrypt(data, password: password, envelope: envelope)
+        } catch {
+            throw PackageReadError.incorrectPassword
+        }
+        return try decoder.decode(type, from: plaintext)
     }
 }

@@ -175,6 +175,37 @@ final class PackageRoundTripTests: XCTestCase {
         }
     }
 
+    func testVersionsRoundTripThroughThePackage() throws {
+        let document = DiagramDocumentModel.blank(title: "Current", at: Date(timeIntervalSince1970: 0))
+        let earlierSnapshot = DiagramDocumentModel.blank(title: "Earlier Draft", at: Date(timeIntervalSince1970: 0))
+        let version = DocumentVersion(createdAt: Date(timeIntervalSince1970: 100), note: "First working draft", snapshot: earlierSnapshot)
+
+        let wrapper = try PackageWriter.fileWrapper(for: document, versions: [version])
+        let decodedVersions = try PackageReader.versions(from: wrapper)
+
+        XCTAssertEqual(decodedVersions.count, 1)
+        XCTAssertEqual(decodedVersions.first?.note, "First working draft")
+        XCTAssertEqual(decodedVersions.first?.snapshot.title, "Earlier Draft")
+    }
+
+    func testNoVersionsDirectoryYieldsAnEmptyArrayRatherThanThrowing() throws {
+        let document = DiagramDocumentModel.blank(title: "Current", at: Date(timeIntervalSince1970: 0))
+        let wrapper = try PackageWriter.fileWrapper(for: document)
+        XCTAssertTrue(try PackageReader.versions(from: wrapper).isEmpty)
+    }
+
+    func testVersionsAreEncryptedWhenTheDocumentIs() throws {
+        let document = DiagramDocumentModel.blank(title: "Current", at: Date(timeIntervalSince1970: 0))
+        let version = DocumentVersion(note: "Snapshot", snapshot: document)
+        let wrapper = try PackageWriter.fileWrapper(for: document, password: "sw0rdfish", versions: [version])
+
+        XCTAssertThrowsError(try PackageReader.versions(from: wrapper)) { error in
+            XCTAssertEqual(error as? PackageReadError, .encryptionPasswordRequired)
+        }
+        let decoded = try PackageReader.versions(from: wrapper, password: "sw0rdfish")
+        XCTAssertEqual(decoded.first?.note, "Snapshot")
+    }
+
     func testCurrentSchemaVersionRoundTripsWithoutMigration() throws {
         let document = DiagramDocumentModel.blank(at: Date(timeIntervalSince1970: 0))
         XCTAssertEqual(document.schemaVersion, DiagramDocumentModel.currentSchemaVersion)

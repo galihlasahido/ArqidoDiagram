@@ -12,6 +12,7 @@
 		1CF5EAB53DB7B9C004A8B93A /* DiagramRendering in Frameworks */ = {isa = PBXBuildFile; productRef = ECA3272AD885FA98784B0932 /* DiagramRendering */; };
 		226500684F8D33309AB360A9 /* DiagramDocument.swift in Sources */ = {isa = PBXBuildFile; fileRef = 664420670A4167E8F7B57114 /* DiagramDocument.swift */; };
 		22CC877A4DA7FBF7032917AF /* ContentView.swift in Sources */ = {isa = PBXBuildFile; fileRef = CBC26882DD8172FD1012F325 /* ContentView.swift */; };
+		2AA1A51395EAE438ACC75558 /* VersionHistoryPanelView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 134895D85CC42FEDEEE4E71A /* VersionHistoryPanelView.swift */; };
 		30849A93609B16BC8256A73E /* ValidationModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0467D4007E200E001E3910C5 /* ValidationModel.swift */; };
 		313C3528020CF88B9388AD55 /* InspectorView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4FD41EC125B8CA9E44C02822 /* InspectorView.swift */; };
 		36240E13DBD671FAD8E19C8F /* ValidationStore.swift in Sources */ = {isa = PBXBuildFile; fileRef = 142C7AED24EC297399F039B6 /* ValidationStore.swift */; };
@@ -31,6 +32,7 @@
 		AFE71D5A194BDCE67CD4CEC9 /* StatusBarView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 488320F0290775EF9637D887 /* StatusBarView.swift */; };
 		B056DA583012F4ECD70AF47E /* DiagramExport in Frameworks */ = {isa = PBXBuildFile; productRef = 0A6F24B4CD43AEA820A278C7 /* DiagramExport */; };
 		BD103EF5017C1E4D9B44ED6D /* DiagramCommands in Frameworks */ = {isa = PBXBuildFile; productRef = A188D553E903E92AC790DEF6 /* DiagramCommands */; };
+		C0440327D857DCB7646164A0 /* VersionHistoryModel.swift in Sources */ = {isa = PBXBuildFile; fileRef = A6DC0679515F4377C34D7450 /* VersionHistoryModel.swift */; };
 		C2CC9AC89FE2DD85ED536CB9 /* DiagramDocumentWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 944039CEA4BF2D86958B0CF8 /* DiagramDocumentWindowController.swift */; };
 		CCF51066A21E2ED6D3E387E7 /* TemplatePickerWindowController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 6DCCEBDDFDEED916BC294B11 /* TemplatePickerWindowController.swift */; };
 		DB432E0DA079A995288E02C1 /* TemplatePickerView.swift in Sources */ = {isa = PBXBuildFile; fileRef = 4F6F2CA21F7122D1FC94C4B1 /* TemplatePickerView.swift */; };
@@ -45,6 +47,7 @@
 /* Begin PBXFileReference section */
 		0229936EB5CC69E54683FBA2 /* LibrarySidebarView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = LibrarySidebarView.swift; sourceTree = "<group>"; };
 		0467D4007E200E001E3910C5 /* ValidationModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationModel.swift; sourceTree = "<group>"; };
+		134895D85CC42FEDEEE4E71A /* VersionHistoryPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionHistoryPanelView.swift; sourceTree = "<group>"; };
 		142C7AED24EC297399F039B6 /* ValidationStore.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationStore.swift; sourceTree = "<group>"; };
 		219837F48E9DD01413C6FBDC /* ArqidoDiagramApp.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ArqidoDiagramApp.swift; sourceTree = "<group>"; };
 		25064BA4FC3F3E47A7952A5F /* AppCommands.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppCommands.swift; sourceTree = "<group>"; };
@@ -59,6 +62,7 @@
 		7B388A2501B26A0B3B29AAEF /* SelectionModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SelectionModel.swift; sourceTree = "<group>"; };
 		82B1719D49120024DD523AEF /* ValidationPanelView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ValidationPanelView.swift; sourceTree = "<group>"; };
 		944039CEA4BF2D86958B0CF8 /* DiagramDocumentWindowController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = DiagramDocumentWindowController.swift; sourceTree = "<group>"; };
+		A6DC0679515F4377C34D7450 /* VersionHistoryModel.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = VersionHistoryModel.swift; sourceTree = "<group>"; };
 		A780AF6A3CCA0588EF2BDC0E /* CustomRuleEditorView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = CustomRuleEditorView.swift; sourceTree = "<group>"; };
 		A84E2B9E3A1C093CEE48F399 /* SearchOverlayView.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SearchOverlayView.swift; sourceTree = "<group>"; };
 		AC0AC164C4B632D1A80B8B69 /* DiagramKit */ = {isa = PBXFileReference; lastKnownFileType = folder; name = DiagramKit; path = Packages/DiagramKit; sourceTree = SOURCE_ROOT; };
@@ -153,6 +157,15 @@
 			path = Pages;
 			sourceTree = "<group>";
 		};
+		80DA25D61384CDD20A258476 /* Versions */ = {
+			isa = PBXGroup;
+			children = (
+				A6DC0679515F4377C34D7450 /* VersionHistoryModel.swift */,
+				134895D85CC42FEDEEE4E71A /* VersionHistoryPanelView.swift */,
+			);
+			path = Versions;
+			sourceTree = "<group>";
+		};
 		8CDEBF7EFAA53772E5D0C547 /* Canvas */ = {
 			isa = PBXGroup;
 			children = (
@@ -186,6 +199,7 @@
 				47C1C81FECA6B1A3C387B3B0 /* Sidebar */,
 				AEB4913E416272684B025C3B /* Templates */,
 				11A58AEA96BF296DA80F79E6 /* Validation */,
+				80DA25D61384CDD20A258476 /* Versions */,
 			);
 			path = UI;
 			sourceTree = "<group>";
@@ -334,6 +348,8 @@
 				30849A93609B16BC8256A73E /* ValidationModel.swift in Sources */,
 				7431EAC770DD5B1B30AFA9F0 /* ValidationPanelView.swift in Sources */,
 				36240E13DBD671FAD8E19C8F /* ValidationStore.swift in Sources */,
+				C0440327D857DCB7646164A0 /* VersionHistoryModel.swift in Sources */,
+				2AA1A51395EAE438ACC75558 /* VersionHistoryPanelView.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

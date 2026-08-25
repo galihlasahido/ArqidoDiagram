@@ -21,7 +21,16 @@ public enum PackageWriter {
     /// password or the derived key) is written alongside them.
     /// `manifest.json` always stays plaintext (see `PackageReader`'s doc
     /// comment on why).
-    public static func fileWrapper(for document: DiagramDocumentModel, appVersion: String = "0.1.0", password: String? = nil) throws -> FileWrapper {
+    /// `versions` (spec §VERSIONING) are full document snapshots, saved
+    /// under `versions/<uuid>.json` — encrypted the same way as the live
+    /// content when `password` is set, since a snapshot can carry exactly
+    /// the same sensitive data the current document does.
+    public static func fileWrapper(
+        for document: DiagramDocumentModel,
+        appVersion: String = "0.1.0",
+        password: String? = nil,
+        versions: [DocumentVersion] = []
+    ) throws -> FileWrapper {
         let encoder = JSONEncoder()
         encoder.outputFormatting = [.sortedKeys, .prettyPrinted]
         encoder.dateEncodingStrategy = .iso8601
@@ -57,11 +66,18 @@ public enum PackageWriter {
         let info = DocumentInfo(title: document.title, createdAt: document.createdAt, modifiedAt: document.modifiedAt)
         let infoData = try encoded(info)
 
+        var versionFileWrappers: [String: FileWrapper] = [:]
+        for version in versions {
+            let data = try encoded(version)
+            versionFileWrappers["\(version.id.uuidString).json"] = FileWrapper(regularFileWithContents: data)
+        }
+
         var children: [String: FileWrapper] = [
             "manifest.json": FileWrapper(regularFileWithContents: manifestData),
             "document.json": FileWrapper(regularFileWithContents: infoData),
             "pages": FileWrapper(directoryWithFileWrappers: pageFileWrappers),
-            "assets": FileWrapper(directoryWithFileWrappers: [:])
+            "assets": FileWrapper(directoryWithFileWrappers: [:]),
+            "versions": FileWrapper(directoryWithFileWrappers: versionFileWrappers)
         ]
         if let envelope {
             children["encryption.json"] = FileWrapper(regularFileWithContents: try encoder.encode(envelope))

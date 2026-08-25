@@ -11,6 +11,7 @@ struct ContentView: View {
     @StateObject private var componentStore = CustomComponentStore()
     @StateObject private var validationModel = ValidationModel()
     @StateObject private var validationStore = ValidationStore()
+    @StateObject private var versionHistoryModel = VersionHistoryModel()
     @State private var activePageID: PageID?
 
     var body: some View {
@@ -42,6 +43,9 @@ struct ContentView: View {
                 if validationModel.isPresented {
                     ValidationPanelView(document: document, validationModel: validationModel, store: validationStore, bridge: inspectorBridge, activePageID: $activePageID)
                         .padding(12)
+                } else if versionHistoryModel.isPresented {
+                    VersionHistoryPanelView(document: document, versionHistoryModel: versionHistoryModel)
+                        .padding(12)
                 }
             }
         } detail: {
@@ -59,6 +63,9 @@ struct ContentView: View {
         }
         .onReceive(NotificationCenter.default.publisher(for: .toggleValidation)) { _ in
             validationModel.isPresented.toggle()
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .toggleVersionHistory)) { _ in
+            versionHistoryModel.isPresented.toggle()
         }
     }
 }
