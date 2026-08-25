@@ -10,20 +10,21 @@ import DiagramRendering
 /// point canvas-driven edits use — Inspector edits are undoable exactly the
 /// same way.
 ///
-/// TODO(step 13): Connector section, once edges exist.
+/// TODO: Connector section — deferred until edges are individually
+/// selectable (see DiagramCanvasView's edge-hit-testing TODO).
 struct InspectorView: View {
     @ObservedObject var document: DiagramDocument
     @ObservedObject var selection: SelectionModel
     @ObservedObject var bridge: InspectorBridge
 
-    private var currentPage: DiagramPage? {
-        guard let pageID = document.model.pageOrder.first else { return nil }
-        return document.model.pages[pageID]
-    }
-
+    /// Scans every page rather than threading an `activePageID` through —
+    /// `selection.selectedNodeIDs` is already pruned to whichever page is
+    /// actually loaded on the canvas (see `DiagramCanvasView.loadPage`), so
+    /// this always resolves to the right page's nodes with no extra state.
     private var selectedNodes: [DiagramNode] {
-        guard let page = currentPage else { return [] }
-        return selection.selectedNodeIDs.compactMap { page.nodes[$0] }
+        document.model.pages.values.flatMap { page in
+            selection.selectedNodeIDs.compactMap { page.nodes[$0] }
+        }
     }
 
     var body: some View {

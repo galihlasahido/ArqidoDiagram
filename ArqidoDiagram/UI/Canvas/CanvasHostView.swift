@@ -14,6 +14,9 @@ struct CanvasHostView: NSViewRepresentable {
     @ObservedObject var selection: SelectionModel
     @ObservedObject var shapeInsertion: ShapeInsertionRequest
     @ObservedObject var inspectorBridge: InspectorBridge
+    @Binding var activePageID: PageID?
+
+    private var resolvedPageID: PageID? { activePageID ?? document.model.pageOrder.first }
 
     func makeNSView(context: Context) -> DiagramCanvasView {
         let view = DiagramCanvasView()
@@ -29,12 +32,12 @@ struct CanvasHostView: NSViewRepresentable {
             writeBack(from: view)
         }
         inspectorBridge.canvasView = view
-        loadCurrentPage(into: view)
+        loadCurrentPage(into: view, coordinator: context.coordinator)
         return view
     }
 
     func updateNSView(_ nsView: DiagramCanvasView, context: Context) {
-        loadCurrentPage(into: nsView)
+        loadCurrentPage(into: nsView, coordinator: context.coordinator)
         // Selection is canvas-owned during canvas interaction; this only
         // matters once something else (Inspector, search) starts writing
         // into `selection` — `applyExternalSelection` no-ops otherwise.
@@ -46,16 +49,29 @@ struct CanvasHostView: NSViewRepresentable {
         }
     }
 
-    private func loadCurrentPage(into view: DiagramCanvasView) {
-        guard let pageID = document.model.pageOrder.first, let page = document.model.pages[pageID] else {
+    func makeCoordinator() -> Coordinator { Coordinator() }
+
+    /// Tracks the last-loaded page ID purely so switching pages can also
+    /// re-fit the viewport to the new page's content (a fresh page's
+    /// content is a different size/position than the one just left).
+    final class Coordinator {
+        var lastLoadedPageID: PageID?
+    }
+
+    private func loadCurrentPage(into view: DiagramCanvasView, coordinator: Coordinator) {
+        guard let pageID = resolvedPageID, let page = document.model.pages[pageID] else {
             view.loadPage(DiagramPage(name: "", order: 0))
             return
         }
         view.loadPage(page)
+        if coordinator.lastLoadedPageID != pageID {
+            coordinator.lastLoadedPageID = pageID
+            view.fitToScreen()
+        }
     }
 
     private func writeBack(from view: DiagramCanvasView) {
-        guard let pageID = document.model.pageOrder.first, let existing = document.model.pages[pageID] else { return }
+        guard let pageID = resolvedPageID, let existing = document.model.pages[pageID] else { return }
         let updated = view.currentPageSnapshot(
             name: existing.name,
             order: existing.order,

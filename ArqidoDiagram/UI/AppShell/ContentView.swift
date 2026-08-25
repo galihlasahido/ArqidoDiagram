@@ -1,4 +1,5 @@
 import SwiftUI
+import DiagramModel
 
 struct ContentView: View {
     @ObservedObject var document: DiagramDocument
@@ -6,6 +7,7 @@ struct ContentView: View {
     @StateObject private var selection = SelectionModel()
     @StateObject private var shapeInsertion = ShapeInsertionRequest()
     @StateObject private var inspectorBridge = InspectorBridge()
+    @State private var activePageID: PageID?
 
     var body: some View {
         NavigationSplitView {
@@ -20,7 +22,8 @@ struct ContentView: View {
                 status: canvasStatus,
                 selection: selection,
                 shapeInsertion: shapeInsertion,
-                inspectorBridge: inspectorBridge
+                inspectorBridge: inspectorBridge,
+                activePageID: $activePageID
             )
             .navigationSplitViewColumnWidth(min: 400, ideal: 900)
             .navigationTitle(document.model.title)
@@ -29,7 +32,10 @@ struct ContentView: View {
                 .navigationSplitViewColumnWidth(min: 240, ideal: 280, max: 360)
         }
         .safeAreaInset(edge: .bottom, spacing: 0) {
-            StatusBarView(document: document, canvasStatus: canvasStatus, selection: selection)
+            StatusBarView(document: document, canvasStatus: canvasStatus, selection: selection, activePageID: $activePageID)
+        }
+        .onAppear {
+            if activePageID == nil { activePageID = document.model.pageOrder.first }
         }
     }
 }

@@ -34,6 +34,63 @@ final class DiagramDocument: NSDocument, ObservableObject {
         model.modifiedAt = Date()
     }
 
+    // MARK: - Page management
+    //
+    // Page add/rename/delete/duplicate/reorder are document-level structural
+    // changes, not a mutation of the currently active page's live scene —
+    // they go through `undoManager` directly here rather than through
+    // DiagramCommands/SceneStore (which is scoped to one page at a time).
+
+    @discardableResult
+    func addPage(named name: String? = nil) -> PageID {
+        let page = DiagramPage(name: name ?? "Page \(model.pageOrder.count + 1)", order: model.pageOrder.count)
+        insertPage(page, at: model.pageOrder.count, actionName: "Add Page")
+        return page.id
+    }
+
+    func duplicatePage(id: PageID) {
+        guard let original = model.pages[id] else { return }
+        var copy = original
+        copy.id = PageID()
+        copy.name = original.name + " Copy"
+        let index = (model.pageOrder.firstIndex(of: id) ?? model.pageOrder.count - 1) + 1
+        insertPage(copy, at: index, actionName: "Duplicate Page")
+    }
+
+    func removePage(id: PageID) {
+        guard let page = model.pages[id] else { return }
+        let index = model.pageOrder.firstIndex(of: id) ?? model.pageOrder.count
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.insertPage(page, at: index, actionName: "Delete Page")
+        }
+        undoManager?.setActionName("Delete Page")
+        model.pages.removeValue(forKey: id)
+        model.pageOrder.removeAll { $0 == id }
+        model.modifiedAt = Date()
+    }
+
+    func renamePage(id: PageID, to newName: String) {
+        guard var page = model.pages[id], !newName.isEmpty, newName != page.name else { return }
+        let oldName = page.name
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.renamePage(id: id, to: oldName)
+        }
+        undoManager?.setActionName("Rename Page")
+        page.name = newName
+        model.pages[id] = page
+        model.modifiedAt = Date()
+    }
+
+    private func insertPage(_ page: DiagramPage, at index: Int, actionName: String) {
+        undoManager?.registerUndo(withTarget: self) { doc in
+            doc.removePage(id: page.id)
+        }
+        undoManager?.setActionName(actionName)
+        model.pages[page.id] = page
+        model.pageOrder.insert(page.id, at: min(index, model.pageOrder.count))
+        model.modifiedAt = Date()
+    }
+
     override class var autosavesInPlace: Bool { true }
 
     override func makeWindowControllers() {
