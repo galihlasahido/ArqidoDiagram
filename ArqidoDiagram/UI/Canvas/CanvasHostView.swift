@@ -49,9 +49,9 @@ struct CanvasHostView: NSViewRepresentable {
         // into `selection` — `applyExternalSelection` no-ops otherwise.
         nsView.applyExternalSelection(selection.selectedNodeIDs)
 
-        if let type = shapeInsertion.pendingType {
-            nsView.addNode(ofType: type)
-            shapeInsertion.pendingType = nil
+        if let pending = shapeInsertion.pending {
+            nsView.addNode(ofType: pending.shapeType, iconType: pending.iconType, text: pending.text)
+            shapeInsertion.pending = nil
         }
     }
 

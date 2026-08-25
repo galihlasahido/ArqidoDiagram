@@ -52,9 +52,35 @@ public enum PageRenderer {
         context.setLineWidth(max(node.style.strokeWidth, 0.5) / scale)
         context.drawPath(using: node.style.strokeWidth > 0 ? .fillStroke : .fill)
 
+        if let iconType = node.iconType {
+            drawIcon(iconType, in: node.frame, context: context, scale: scale)
+        }
+
         if !skipText {
             drawText(node, in: context)
         }
+        context.restoreGState()
+    }
+
+    /// Icon badges are a fixed content-space size (not proportional to the
+    /// node), matching how a real vendor-icon badge stays legible/consistent
+    /// regardless of how large the surrounding shape is resized.
+    private static func drawIcon(_ iconType: TechIconType, in frame: CGRect, context: CGContext, scale: CGFloat) {
+        let badgeSize: CGFloat = min(28, min(frame.width, frame.height) * 0.5)
+        guard badgeSize > 4 else { return }
+        let inset: CGFloat = 6
+        let badgeRect = CGRect(
+            x: frame.minX + inset,
+            y: frame.minY + inset,
+            width: badgeSize,
+            height: badgeSize
+        )
+        let path = IconGeometry.path(for: iconType, in: badgeRect)
+        context.saveGState()
+        context.setStrokeColor(NSColor.labelColor.cgColor)
+        context.setLineWidth(1.25 / scale)
+        context.addPath(path)
+        context.strokePath()
         context.restoreGState()
     }
 

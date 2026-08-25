@@ -69,6 +69,7 @@ struct InspectorView: View {
                 TextField("Degrees", value: degreesBinding, format: .number)
             }
             appearanceSection
+            iconSection
             typographySection
             metadataSection
         }
@@ -95,6 +96,30 @@ struct InspectorView: View {
             ColorPicker("Border", selection: colorBinding(\.strokeColor))
             Slider(value: opacityBinding, in: 0...1) { Text("Opacity") }
         }
+    }
+
+    /// Single-selection only — an icon badge is a per-node decision, unlike
+    /// Appearance/Metadata which apply uniformly across a multi-selection.
+    private var iconSection: some View {
+        Section("Icon") {
+            Picker("Technology Icon", selection: iconTypeBinding) {
+                Text("None").tag(TechIconType?.none)
+                ForEach(IconPack.allCases, id: \.self) { pack in
+                    ForEach(TechIconCatalog.entries(for: pack)) { entry in
+                        Text("\(pack.rawValue) — \(entry.name)").tag(TechIconType?.some(entry.id))
+                    }
+                }
+            }
+        }
+    }
+
+    private var iconTypeBinding: Binding<TechIconType?> {
+        Binding(
+            get: { selectedNodes.first?.iconType },
+            set: { newValue in
+                bridge.canvasView?.updateSelectedNodes(actionName: "Set Icon") { $0.iconType = newValue }
+            }
+        )
     }
 
     private var typographySection: some View {

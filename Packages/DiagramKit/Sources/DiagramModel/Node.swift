@@ -36,6 +36,11 @@ public struct DiagramNode: Codable, Identifiable, Hashable, Sendable {
     public var isHidden: Bool
     /// Reserved for connector attachment points; populated in a later phase.
     public var ports: [Port]
+    /// Optional technology/vendor icon badge drawn over the shape (see
+    /// `PageRenderer.drawNode`) — independent of `type`, which stays purely
+    /// about the outline/silhouette. `Optional` so older documents without
+    /// this field decode via `decodeIfPresent` to `nil`, unaffected.
+    public var iconType: TechIconType?
 
     public init(
         id: NodeID = NodeID(),
@@ -50,7 +55,8 @@ public struct DiagramNode: Codable, Identifiable, Hashable, Sendable {
         groupID: GroupID? = nil,
         isLocked: Bool = false,
         isHidden: Bool = false,
-        ports: [Port] = []
+        ports: [Port] = [],
+        iconType: TechIconType? = nil
     ) {
         self.id = id
         self.type = type
@@ -65,5 +71,6 @@ public struct DiagramNode: Codable, Identifiable, Hashable, Sendable {
         self.isLocked = isLocked
         self.isHidden = isHidden
         self.ports = ports
+        self.iconType = iconType
     }
 }

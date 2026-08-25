@@ -240,7 +240,12 @@ public final class DiagramCanvasView: NSView {
     /// the current viewport's center — e.g. for a sidebar-triggered add
     /// where there's no click location), and selects it.
     @discardableResult
-    public func addNode(ofType type: ShapeType, at contentPoint: CGPoint? = nil) -> NodeID {
+    public func addNode(
+        ofType type: ShapeType,
+        at contentPoint: CGPoint? = nil,
+        iconType: TechIconType? = nil,
+        text: String? = nil
+    ) -> NodeID {
         let size = Size2D(width: 160, height: 100)
         let center = contentPoint ?? viewport.viewToContent(point: CGPoint(x: bounds.midX, y: bounds.midY))
         let maxZ = (scene.nodes.values.map(\.zIndex).max() ?? -1) + 1
@@ -248,7 +253,9 @@ public final class DiagramCanvasView: NSView {
             type: type,
             position: Point2D(x: center.x - size.width / 2, y: center.y - size.height / 2),
             size: size,
-            zIndex: maxZ
+            text: text.map(TextContent.init),
+            zIndex: maxZ,
+            iconType: iconType
         )
         perform(AddNodesCommand(nodes: [node]), actionName: "Add Shape")
         updateSelectionFromInteraction([node.id])

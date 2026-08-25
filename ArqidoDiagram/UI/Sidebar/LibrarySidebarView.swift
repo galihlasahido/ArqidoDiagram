@@ -23,6 +23,15 @@ struct LibrarySidebarView: View {
         return ShapeCatalog.all.filter { $0.name.lowercased().contains(lowered) }
     }
 
+    private var iconSearchResults: [TechIconCatalogEntry]? {
+        let query = searchText.trimmingCharacters(in: .whitespacesAndNewlines)
+        guard !query.isEmpty else { return nil }
+        let lowered = query.lowercased()
+        return TechIconCatalog.all.filter {
+            $0.name.lowercased().contains(lowered) || $0.tags.contains { $0.lowercased().contains(lowered) }
+        }
+    }
+
     var body: some View {
         List {
             HStack {
@@ -31,9 +40,10 @@ struct LibrarySidebarView: View {
                     .textFieldStyle(.plain)
             }
 
-            if let results = searchResults {
+            if searchResults != nil || iconSearchResults != nil {
                 Section("Results") {
-                    ForEach(results) { entry in shapeRow(entry) }
+                    ForEach(searchResults ?? []) { entry in shapeRow(entry) }
+                    ForEach(iconSearchResults ?? []) { entry in iconRow(entry) }
                 }
             } else {
                 if !favorites.isEmpty {
@@ -49,6 +59,11 @@ struct LibrarySidebarView: View {
                 ForEach(ShapeCategory.allCases, id: \.self) { category in
                     Section(category.rawValue) {
                         ForEach(ShapeCatalog.entries(for: category)) { entry in shapeRow(entry) }
+                    }
+                }
+                ForEach(IconPack.allCases, id: \.self) { pack in
+                    Section("\(pack.rawValue) Icons") {
+                        ForEach(TechIconCatalog.entries(for: pack)) { entry in iconRow(entry) }
                     }
                 }
             }
@@ -86,7 +101,7 @@ struct LibrarySidebarView: View {
     }
 
     private func insert(_ entry: ShapeCatalogEntry) {
-        shapeInsertion.pendingType = entry.type
+        shapeInsertion.pending = PendingInsertion(shapeType: entry.type)
         recentlyUsed.removeAll { $0 == entry.type }
         recentlyUsed.insert(entry.type, at: 0)
         if recentlyUsed.count > 8 { recentlyUsed.removeLast() }
@@ -94,5 +109,19 @@ struct LibrarySidebarView: View {
 
     private func toggleFavorite(_ type: ShapeType) {
         if favorites.contains(type) { favorites.remove(type) } else { favorites.insert(type) }
+    }
+
+    /// Icon badges are inserted as a rounded-rectangle "container" node
+    /// carrying the icon type and a name label — a real, editable node
+    /// (movable/resizable/re-stylable like any other), not a special-cased
+    /// read-only pictogram.
+    private func iconRow(_ entry: TechIconCatalogEntry) -> some View {
+        Button {
+            shapeInsertion.pending = PendingInsertion(shapeType: .roundedRectangle, iconType: entry.id, text: entry.name)
+        } label: {
+            Label(entry.name, systemImage: "square.grid.2x2")
+        }
+        .buttonStyle(.plain)
+        .help("Add \(entry.pack.rawValue) \(entry.name) to the canvas")
     }
 }
